@@ -1,0 +1,281 @@
+:root {
+  --green: hsl(160, 7%, 25%);
+  --red: hsl(345, 90%, 60%);
+  --oldWhite: hsl(34, 14%, 91%);
+
+  font-family: monospace;
+  font-size: 18px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--green);
+}
+
+/*** Header ***/
+
+header {
+  background-color: var(--green);
+  min-height: 130px;
+  padding: 0 5vw;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h1 {
+  display: inline-block;
+  font-family: "Coiny", cursive;
+  font-size: min(3.3rem, 12vw);
+  line-height: 0px;
+
+  color: white;
+}
+
+#title span {
+  position: relative;
+  bottom: .03em;
+  font-family: serif;
+  font-size: 2em;
+
+  color: var(--red);
+}
+
+#navBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 300px;
+}
+
+#scores {
+  font-size: clamp(1em, 3.82vw + .32em, 1.7em);
+  color: white;
+}
+
+#settingIcon {
+  display: block;
+  height: 1.7rem;
+  width: 1.7rem;
+  transition: transform 1s;
+}
+#settingIcon:hover {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 875px) {
+  header { 
+    flex-direction: column;
+    justify-content: space-evenly; }
+  #navBar { 
+    width: 100%; 
+    align-items: center;}
+  #scores {
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+    justify-content: space-between;}
+  #scores p {
+    margin-right: 5vw; }
+}
+
+@media (max-width: 300px) {
+  #scores {
+    flex-direction: column;
+  }
+}
+
+@media (max-height: 500px) {
+  header { 
+    min-height: 80px;
+    flex-direction: row; 
+  }
+  #navBar { font-size: .8em; }
+  #scores { 
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
+
+/*** Élements de jeu ***/
+
+main {
+  position: relative;
+  background-color: var(--green);
+}
+
+canvas {
+  background-color: var(--oldWhite);
+  width: 100%;
+  display: block;
+  margin: auto;
+}
+
+h2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: min(3rem, 9vw);;
+  text-align: center;
+  color: var(--green);
+}
+
+#pause {
+  color: #fff;
+  display: none;
+}
+
+#gameOver {
+  background-color: hsla(34, 14%, 91%, .5);
+  border-radius: 60px;
+  padding: .5em 1em .6em;
+  width: fit-content;
+  display: none;
+}
+
+#setting {
+  display: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  max-width: 780px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--oldWhite);
+}
+@media (min-width: 715px) { 
+  #setting { 
+    bottom: 0; 
+    overflow: auto;
+  }
+}
+@media (max-width: 500px) { 
+  #setting { 
+    top: -52px; 
+    height: calc(100vh - 78px);
+  }
+}
+#setting h2 {
+  position: relative; /* Init du h2 général */
+  top: 0;
+
+  font-size: clamp(1rem, 10vw - .4rem, 2rem);
+  margin-top: 1em;
+}
+
+#exitSetting {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 2.5em;
+  width: 2.5em;
+}
+#exitSetting span {
+  display: block;
+  position: absolute;
+  margin: 1.5em 1em 0 0;
+  height: .1em;
+  width: 1.6em;
+  border-radius: .1em;
+  background-color: var(--red);
+  transform: rotate(45deg);
+}
+#exitSetting span:first-child {
+  transform: rotate(-45deg);
+}
+
+form {
+  font-size: clamp(.6em, 5vw, 1em);
+  padding: 1.3em 1em;
+  color: var(--green);
+}
+
+fieldset {
+  border: 1px solid var(--red);
+  border-radius: 1em;
+  padding: 1em 1.3em 0.3em 1.3em;
+  margin-bottom: 1.3em;
+}
+
+legend {
+  padding: 0 0.7em 0.2em;
+  font-size: 1.3em;
+}
+
+.settingDescriptions {
+  font-size: 0.9em;
+  opacity: 0.7;
+}
+
+/**/
+
+/*** Gestion des boutons radio personnalisé ***/
+
+label {
+  display: block;
+  position: relative;
+  padding-left: calc(25px + 1em);
+  margin-bottom: 1.2em;
+  cursor: pointer;
+}
+
+/* Cache le bouton radio par défault */
+label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Créer un bouton radio personnalisé */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0px;
+  height: 25px;
+  width: 25px;
+  background-color: #fff;
+  border-radius: 50%;
+}
+
+/* Au survol : en gris */
+label:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* Pour la selection en cours : */
+label input:checked ~ .checkmark {
+  background-color: var(--red);
+}
+
+/*** Footer ***/
+
+footer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 1em;
+  height: 100%;
+  min-height: 100px;
+
+  background-color: var(--green);
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: var(--red);
+}
