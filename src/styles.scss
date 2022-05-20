@@ -209,8 +209,14 @@ fieldset {
 }
 
 legend {
+  display: flex;
   padding: 0 0.7em 0.2em;
   font-size: 1.3em;
+
+  #snakePreview {
+    position: absolute;
+    left: 8em;
+  }
 }
 
 .settingDescriptions {

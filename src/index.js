@@ -1,9 +1,9 @@
 import "./styles.scss";
+import COLORS from "./app/Colors.js";
 import { Snake } from "./app/Snake.js";
 import { Skins } from "./app/GameSkins.js";
 
-const canvas = document.createElement("canvas"); // Créer un nouvel élément <canvas> et l'enregistre dans la variable canvas.
-canvas.id = "mainGame";
+/** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
 export const canvasWidth = 780;
 export const canvasHeight = 600;
 export const cellSize = 30;
@@ -20,23 +20,19 @@ let again = false;
 let gameLoopDelay = 140;
 const minGameLoopDelay = 40;
 
-const green = "hsl(140, 10%, 20%)";
-export const red = "hsl(345, 90%, 50%)";
-const oldWhite = "hsl(34, 14%, 91%)";
-
 let borderGameStyle;
 export let gameStyle = "classic";
 let style;
 
 let snake;
-export let snakeColor = green;
+export let snakeColor = COLORS.green;
 let snakeStartingBody = [
     [5, 2, "right"],
     [4, 2, "right"],
     [3, 2, "right"],
 ];
 let apple;
-let appleColor = red;
+let appleColor = COLORS.red;
 
 let score = 0;
 const lastBestScore = localStorage.getItem("snakeBestScore");
@@ -64,9 +60,6 @@ function init() {
     }
     setCanvasSize();
     window.addEventListener("resize", setCanvasSize);
-
-    const main = document.getElementsByTagName("main")[0];
-    main.appendChild(canvas); // document = <html> // appendChild(canvas) va ajouter le <canvas> dans le <main> .
 
     pause = false;
     borderGameStyle = "mirror";
@@ -97,7 +90,7 @@ function reload() {
     // Redemarre seulement si la touche est pressée.
     if (again) {
         snake.rebornWith(snakeStartingBody);
-        snakeColor = green;
+        snakeColor = COLORS.green;
         gameOverElement.style.display = "none";
         score = 0;
         again = false;
@@ -133,7 +126,7 @@ function isCollisions() {
 
 function gameOver() {
     snake.life = false;
-    snakeColor = red;
+    snakeColor = COLORS.red;
     document.getElementById("gameOver").style.display = "block";
 }
 
@@ -231,7 +224,7 @@ function pauseOrReload() {
         pauseElement.style.display = "block";
     } else {
         pause = false;
-        canvas.style.backgroundColor = oldWhite;
+        canvas.style.backgroundColor = COLORS.oldWhite;
         pauseElement.style.display = "none";
         requestAnimationFrame(refreshCanvas);
     }
@@ -252,6 +245,17 @@ function getScore() {
 const settingIcon = document.getElementById("settingIcon");
 const exitIcon = document.getElementById("exitSetting");
 const setting = document.getElementById("setting");
+/** @type HTMLCanvasElement */ const snakePreviewCanvas = document.querySelector("#snakePreview");
+snakePreviewCanvas.width = 7 * cellSize;
+snakePreviewCanvas.height = 3 * cellSize;
+const snakePreviewCtx = snakePreviewCanvas.getContext("2d");
+const snakePreview = new Snake([
+    [5, 1, "right"],
+    [4, 1, "right"],
+    [3, 1, "right"],
+    [2, 1, "right"],
+    [1, 1, "right"],
+]);
 
 settingIcon.addEventListener("click", getSetting);
 exitIcon.addEventListener("click", getSetting);
@@ -303,7 +307,7 @@ function selectingGamePlay(event) {
     ) {
         case "wallsSelector":
             borderGameStyle = "walls";
-            canvas.style.border = "3px solid " + red;
+            canvas.style.border = "3px solid " + COLORS.red;
             break;
 
         case "mirrorSelector":

@@ -1,3 +1,5 @@
+import COLORS from "./Colors.js";
+
 export function Skins(gameStyle, contexte, cellSize) {
     this.x = null;
     this.y = null;
@@ -12,7 +14,8 @@ export function Skins(gameStyle, contexte, cellSize) {
     });
 
     const radius = cellSize / 2;
-    const red = "hsl(345, 90%, 50%)";
+    let snakeColor = COLORS.green;
+    let appleColor = COLORS.red;
 
     this.isCoordinates = function () {
         try {
@@ -24,6 +27,36 @@ export function Skins(gameStyle, contexte, cellSize) {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    // Initialise le dessin en fonction de la direction de la cellule :
+    this.beginDraw = function (direction) {
+        contexte.save();
+        contexte.fillStyle = snakeColor;
+        contexte.beginPath();
+        contexte.translate(this.x + radius, this.y + radius); // On déplace le canvas au niveau de notre centre de rotation
+        switch (
+            direction // On tourne l'élément selon la direction
+        ) {
+            case "right":
+                break; // On laisse dans ce sens
+
+            case "down":
+                contexte.rotate(Math.PI * 0.5);
+                break;
+
+            case "left":
+                contexte.rotate(Math.PI * 1);
+                break;
+
+            case "up":
+                contexte.rotate(Math.PI * 1.5);
+                break;
+
+            default:
+                throw "Invalid direction";
+        }
+        contexte.translate(-this.x - radius, -this.y - radius); // On remet le canvas en place
     };
 
     switch (gameStyle) {
@@ -40,7 +73,7 @@ export function Skins(gameStyle, contexte, cellSize) {
                 contexte.arc(this.x + radius + 3, this.y + radius, radius - 3, 0, Math.PI * 2); // x, y : coordonnées du centre, rayon, angleDépart, angleFin (Math.PI * 2 : cercle complet, Math.PI : demi-cercle), sensAntiHoraire.
                 contexte.fill();
                 contexte.beginPath();
-                contexte.fillStyle = red;
+                contexte.fillStyle = COLORS.red;
                 const eyeRadius = radius / 3.2;
                 contexte.arc(this.x + eyeRadius, this.y + eyeRadius, eyeRadius, 0, Math.PI * 2);
                 contexte.arc(
@@ -110,4 +143,9 @@ export function Skins(gameStyle, contexte, cellSize) {
                     };
             break;
     }
+
+    this.closeDraw = function () {
+        contexte.fill();
+        contexte.restore();
+    };
 }
