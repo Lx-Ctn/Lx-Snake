@@ -113,7 +113,7 @@ main {
   background-color: var(--green);
 }
 
-canvas {
+#mainGame {
   background-color: var(--oldWhite);
   width: 100%;
   display: block;
@@ -210,12 +210,14 @@ fieldset {
 
 legend {
   display: flex;
+  align-items: center;
   padding: 0 0.7em 0.2em;
   font-size: 1.3em;
 
   #snakePreview {
     position: absolute;
     left: 8em;
+    margin-top: 0.2em;
   }
 }
 

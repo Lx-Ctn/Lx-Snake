@@ -3,6 +3,7 @@ import COLORS from "./Colors.js";
 export function Skins(gameStyle, contexte, cellSize) {
     this.x = null;
     this.y = null;
+    this.snakeColor = COLORS.green;
 
     Object.defineProperty(this, "coordinates", {
         set: function (coordinates) {
@@ -14,8 +15,7 @@ export function Skins(gameStyle, contexte, cellSize) {
     });
 
     const radius = cellSize / 2;
-    let snakeColor = COLORS.green;
-    let appleColor = COLORS.red;
+    const appleColor = COLORS.red;
 
     this.isCoordinates = function () {
         try {
@@ -31,8 +31,9 @@ export function Skins(gameStyle, contexte, cellSize) {
 
     // Initialise le dessin en fonction de la direction de la cellule :
     this.beginDraw = function (direction) {
+        this.isCoordinates();
         contexte.save();
-        contexte.fillStyle = snakeColor;
+        contexte.fillStyle = this.snakeColor;
         contexte.beginPath();
         contexte.translate(this.x + radius, this.y + radius); // On déplace le canvas au niveau de notre centre de rotation
         switch (
@@ -63,21 +64,43 @@ export function Skins(gameStyle, contexte, cellSize) {
         case "bigHead":
             this.head = function () {
                 this.isCoordinates();
-                contexte.translate(this.x + radius, this.y + radius); // On déplace le canvas au niveau de notre centre de rotation
+                const headScale = 1.2; // Echelle : it's a BIG head !
+                const headShift = (cellSize * headScale) / 4; // Décalage : la tête dépasse en arrière
+
+                // On déplace le canvas au niveau de notre centre de rotation :
+                contexte.translate(this.x - headShift + radius, this.y - headScale / 2 + radius); // On tiens de l'échelle et du décalage pour center la cellule modifiée
                 contexte.rotate(Math.PI * 0.25);
-                contexte.translate(-this.x - radius, -this.y - radius); // On remet le canvas en place
-                contexte.rect(this.x - 10, this.y + 4, 1.2 * cellSize, 1.2 * cellSize);
-                contexte.translate(this.x + radius, this.y + radius);
+                contexte.rect(
+                    (-headScale * cellSize) / 2,
+                    (-headScale * cellSize) / 2,
+                    headScale * cellSize,
+                    headScale * cellSize
+                );
                 contexte.rotate(Math.PI * -0.25);
-                contexte.translate(-this.x - radius, -this.y - radius);
-                contexte.arc(this.x + radius + 3, this.y + radius, radius - 3, 0, Math.PI * 2); // x, y : coordonnées du centre, rayon, angleDépart, angleFin (Math.PI * 2 : cercle complet, Math.PI : demi-cercle), sensAntiHoraire.
+                contexte.translate(-this.x + headShift - radius, -this.y + headScale / 2 - radius); // On remet le canvas en place
+
+                contexte.arc(
+                    this.x + radius * headScale,
+                    this.y + radius,
+                    radius / headScale,
+                    0,
+                    Math.PI * 2
+                );
                 contexte.fill();
+
+                // Yeux :
                 contexte.beginPath();
                 contexte.fillStyle = COLORS.red;
-                const eyeRadius = radius / 3.2;
-                contexte.arc(this.x + eyeRadius, this.y + eyeRadius, eyeRadius, 0, Math.PI * 2);
+                const eyeRadius = radius / headScale / 2.6;
                 contexte.arc(
-                    this.x + eyeRadius,
+                    this.x + eyeRadius * headScale,
+                    this.y + eyeRadius,
+                    eyeRadius,
+                    0,
+                    Math.PI * 2
+                );
+                contexte.arc(
+                    this.x + eyeRadius * headScale,
                     this.y + cellSize - eyeRadius,
                     eyeRadius,
                     0,

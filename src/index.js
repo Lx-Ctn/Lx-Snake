@@ -25,7 +25,7 @@ export let gameStyle = "classic";
 let style;
 
 let snake;
-export let snakeColor = COLORS.green;
+let snakeColor = COLORS.green;
 let snakeStartingBody = [
     [5, 2, "right"],
     [4, 2, "right"],
@@ -90,7 +90,7 @@ function reload() {
     // Redemarre seulement si la touche est pressée.
     if (again) {
         snake.rebornWith(snakeStartingBody);
-        snakeColor = COLORS.green;
+        style.snakeColor = COLORS.green;
         gameOverElement.style.display = "none";
         score = 0;
         again = false;
@@ -126,7 +126,7 @@ function isCollisions() {
 
 function gameOver() {
     snake.life = false;
-    snakeColor = COLORS.red;
+    style.snakeColor = COLORS.red;
     document.getElementById("gameOver").style.display = "block";
 }
 
@@ -246,16 +246,23 @@ const settingIcon = document.getElementById("settingIcon");
 const exitIcon = document.getElementById("exitSetting");
 const setting = document.getElementById("setting");
 /** @type HTMLCanvasElement */ const snakePreviewCanvas = document.querySelector("#snakePreview");
-snakePreviewCanvas.width = 7 * cellSize;
-snakePreviewCanvas.height = 3 * cellSize;
+const PreviewcellSize = 20;
+const snakePreviewLength = 7;
+snakePreviewCanvas.width = (snakePreviewLength + 2) * PreviewcellSize;
+snakePreviewCanvas.height = 3 * PreviewcellSize;
 const snakePreviewCtx = snakePreviewCanvas.getContext("2d");
-const snakePreview = new Snake([
-    [5, 1, "right"],
-    [4, 1, "right"],
-    [3, 1, "right"],
-    [2, 1, "right"],
-    [1, 1, "right"],
-]);
+let previewStyle;
+const snakePreviewBody = [];
+for (let i = 1; i <= snakePreviewLength; i++) {
+    snakePreviewBody.unshift([i, 1, "right"]);
+}
+const snakePreview = new Snake(snakePreviewBody);
+
+function getSnakePreview() {
+    snakePreviewCtx.clearRect(0, 0, snakePreviewCanvas.width, snakePreviewCanvas.height);
+    previewStyle = new Skins(gameStyle, snakePreviewCtx, PreviewcellSize);
+    snakePreview.draw(previewStyle);
+}
 
 settingIcon.addEventListener("click", getSetting);
 exitIcon.addEventListener("click", getSetting);
@@ -266,6 +273,7 @@ function getSetting(event) {
     if (!pause && snake.life) {
         pauseOrReload();
     }
+    getSnakePreview();
     setting.style.display = setting.style.display == "block" ? "none" : "block";
 }
 
@@ -358,7 +366,10 @@ function selectingStyle(event) {
             throw "Invalid Style";
     }
 
-    // Met à jour le canvas pour afficher le nouveau mode :
+    // Mise à jour du preview du snake avec le nouveau style :
+    getSnakePreview();
+
+    // Met à jour du canvas du jeu pour afficher le nouveau mode :
     style = new Skins(gameStyle, contexte, cellSize);
     contexte.clearRect(0, 0, canvas.width, canvas.height);
     apple.draw();
