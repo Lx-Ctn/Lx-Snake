@@ -1,20 +1,20 @@
 import { Skins } from "./GameSkins.js";
-import { gameStyle, contexte, cellSize, snakeColor } from "../index.js";
+import { contexte, cellSize, snakeColor } from "../index.js";
 
 // Construction des éléments du serpent :
 export function SnakeCell(coordonnees, direction) {
-    let Style = new Skins(gameStyle, contexte, coordonnees, cellSize);
-    this.x = coordonnees[0] * cellSize;
-    this.y = coordonnees[1] * cellSize;
+    this.x = coordonnees[0];
+    this.y = coordonnees[1];
     this.direction = direction;
-    let radius = cellSize / 2;
+
+    const radius = cellSize / 2;
 
     // Initialise le dessin en fonction de la direction :
     this.beginDraw = function () {
         contexte.save();
         contexte.fillStyle = snakeColor;
         contexte.beginPath();
-        contexte.translate(this.x + radius, this.y + radius); // On déplace le canvas au niveau de notre centre de rotation
+        contexte.translate(this.x * cellSize + radius, this.y * cellSize + radius); // On déplace le canvas au niveau de notre centre de rotation
         switch (
             this.direction // On tourne l'élément selon la direction
         ) {
@@ -36,31 +36,32 @@ export function SnakeCell(coordonnees, direction) {
             default:
                 throw "Invalid direction";
         }
-        contexte.translate(-this.x - radius, -this.y - radius); // On remet le canvas en place
+        contexte.translate(-this.x * cellSize - radius, -this.y * cellSize - radius); // On remet le canvas en place
     };
 
     // Lance le dessin de l'élément :
-    this.draw = function (position) {
+    this.draw = function (style, position) {
+        style.coordinates = [this.x, this.y];
         this.beginDraw();
         switch (position) {
             case "head":
-                Style.head();
+                style.head();
                 break;
 
             case "body":
-                Style.body();
+                style.body();
                 break;
 
             case "turnRight":
-                Style.turn("right");
+                style.turn("right");
                 break;
 
             case "turnLeft":
-                Style.turn("left");
+                style.turn("left");
                 break;
 
             case "tail":
-                Style.tail();
+                style.tail();
                 break;
             default:
                 throw "Invalid position";

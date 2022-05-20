@@ -1,5 +1,6 @@
 import "./styles.scss";
 import { Snake } from "./app/Snake.js";
+import { Skins } from "./app/GameSkins.js";
 
 const canvas = document.createElement("canvas"); // Créer un nouvel élément <canvas> et l'enregistre dans la variable canvas.
 canvas.id = "mainGame";
@@ -23,12 +24,16 @@ const green = "hsl(140, 10%, 20%)";
 export const red = "hsl(345, 90%, 50%)";
 const oldWhite = "hsl(34, 14%, 91%)";
 
+let borderGameStyle;
+export let gameStyle = "classic";
+let style;
+
 let snake;
 export let snakeColor = green;
 let snakeStartingBody = [
+    [5, 2, "right"],
     [4, 2, "right"],
     [3, 2, "right"],
-    [2, 2, "right"],
 ];
 let apple;
 let appleColor = red;
@@ -36,9 +41,6 @@ let appleColor = red;
 let score = 0;
 const lastBestScore = localStorage.getItem("snakeBestScore");
 let bestScore = lastBestScore ? +lastBestScore : 0;
-
-let borderGameStyle;
-export let gameStyle = "classic";
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - ajouter un vrai menu différentes catégories ?
@@ -69,6 +71,8 @@ function init() {
     pause = false;
     borderGameStyle = "mirror";
     contexte = canvas.getContext("2d");
+
+    style = new Skins(gameStyle, contexte, cellSize);
     snake = new Snake(snakeStartingBody);
     apple = new Apple([6, 8]);
 
@@ -90,8 +94,8 @@ function letsGo() {
 
 // Remet à 0 le jeu après un game-over :
 function reload() {
+    // Redemarre seulement si la touche est pressée.
     if (again) {
-        // Redemarre seulement si la touche est pressée.
         snake.rebornWith(snakeStartingBody);
         snakeColor = green;
         gameOverElement.style.display = "none";
@@ -109,16 +113,16 @@ function isCollisions() {
     switch (borderGameStyle) {
         case "walls":
             borderCollision =
-                snake.head[0] < 0 ||
-                snake.head[0] > maxCellsInWidth - 1 ||
-                snake.head[1] < 0 ||
-                snake.head[1] > maxCellsInHeight - 1;
+                snake.head.x < 0 ||
+                snake.head.x > maxCellsInWidth - 1 ||
+                snake.head.y < 0 ||
+                snake.head.y > maxCellsInHeight - 1;
             break;
         case "mirror":
-            if (snake.head[0] < 0) snake.head[0] = maxCellsInWidth - 1;
-            if (snake.head[0] > maxCellsInWidth - 1) snake.head[0] = 0;
-            if (snake.head[1] < 0) snake.head[1] = maxCellsInHeight - 1;
-            if (snake.head[1] > maxCellsInHeight - 1) snake.head[1] = 0;
+            if (snake.head.x < 0) snake.head.x = maxCellsInWidth - 1;
+            if (snake.head.x > maxCellsInWidth - 1) snake.head.x = 0;
+            if (snake.head.y < 0) snake.head.y = maxCellsInHeight - 1;
+            if (snake.head.y > maxCellsInHeight - 1) snake.head.y = 0;
             break;
         default:
             throw "Invalid Gameplay";
@@ -161,7 +165,7 @@ function refreshCanvas() {
 
         contexte.clearRect(0, 0, canvas.width, canvas.height);
         apple.draw();
-        snake.draw();
+        snake.draw(style);
 
         if (snake.life) {
             setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
@@ -172,8 +176,9 @@ function refreshCanvas() {
 }
 
 // Construit l'objet pomme :
-function Apple(position) {
-    this.position = position;
+function Apple(coordonnees) {
+    this.x = coordonnees[0];
+    this.y = coordonnees[1];
 
     // Dessine une pomme :
     this.draw = function () {
@@ -181,9 +186,9 @@ function Apple(position) {
         contexte.fillStyle = appleColor;
         contexte.beginPath();
 
-        var radius = cellSize / 2;
-        var x = this.position[0] * cellSize;
-        var y = this.position[1] * cellSize;
+        const radius = cellSize / 2;
+        const x = this.x * cellSize;
+        const y = this.y * cellSize;
 
         gameStyle === "classic"
             ? contexte.rect(x + 3, y + 3, cellSize - 6, cellSize - 6)
@@ -197,19 +202,15 @@ function Apple(position) {
 
     // Définie de nouvelle coordonnées aléatoires :
     this.setNewPosition = function () {
-        var newX = Math.floor(Math.random() * maxCellsInWidth);
-        var newY = Math.floor(Math.random() * maxCellsInHeight);
-        this.position = [newX, newY];
+        this.x = Math.floor(Math.random() * maxCellsInWidth);
+        this.y = Math.floor(Math.random() * maxCellsInHeight);
     };
 
     // Vérifie si les coordonnées ne sont pas sur le serpent :
     this.isOnSnake = function (snakeToCheck) {
-        var isOnSnake = false;
-        for (var i = 0; i < snakeToCheck.body.length; i++) {
-            if (
-                this.position[0] == snakeToCheck.body[i][0] &&
-                this.position[1] == snakeToCheck.body[i][1]
-            ) {
+        let isOnSnake = false;
+        for (let i = 0; i < snakeToCheck.body.length; i++) {
+            if (this.x === snakeToCheck.body[i].x && this.y === snakeToCheck.body[i].y) {
                 isOnSnake = true;
             }
         }
@@ -324,9 +325,7 @@ for (const style of styleSelector) {
 
 function selectingStyle(event) {
     const radius = (cellSize / 2).toString() + "px";
-    switch (
-        event.currentTarget.id // currentTarget : élément à partir duquel l'événement à été appelé (gamePlay ici); Target : élément précis qui à déclencher l'événement, donc peut être un enfant de currentTarget
-    ) {
+    switch (event.currentTarget.id) {
         case "classicSelector":
             gameStyle = "classic";
             canvas.style.borderRadius = "0";
@@ -354,9 +353,12 @@ function selectingStyle(event) {
         default:
             throw "Invalid Style";
     }
+
+    // Met à jour le canvas pour afficher le nouveau mode :
+    style = new Skins(gameStyle, contexte, cellSize);
     contexte.clearRect(0, 0, canvas.width, canvas.height);
-    apple.draw(); // Met à jour le canvas pour afficher le nouveau mode.
-    snake.draw();
+    apple.draw();
+    snake.draw(style);
 }
 /*
 
