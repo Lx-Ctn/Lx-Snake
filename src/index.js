@@ -16,7 +16,7 @@ const pauseElement = document.getElementById("pause");
 const gameOverElement = document.getElementById("gameOver");
 const footerElement = document.getElementById("footer");
 const mainElement = document.getElementById("main");
-let again = false;
+let tryAgain = false;
 let gameLoopDelay = 140;
 const minGameLoopDelay = 40;
 
@@ -88,12 +88,12 @@ function letsGo() {
 // Remet à 0 le jeu après un game-over :
 function reload() {
     // Redemarre seulement si la touche est pressée.
-    if (again) {
+    if (tryAgain) {
         snake.rebornWith(snakeStartingBody);
         style.snakeColor = COLORS.green;
         gameOverElement.style.display = "none";
         score = 0;
-        again = false;
+        tryAgain = false;
 
         requestAnimationFrame(refreshCanvas);
     }
@@ -215,7 +215,7 @@ function Apple(coordonnees) {
 function pauseOrReload() {
     if (!snake.life) {
         // Si gameOver :
-        again = true;
+        tryAgain = true;
         reload(); // On relance
     } else if (!pause) {
         // Sinon on gère la mise en pause
