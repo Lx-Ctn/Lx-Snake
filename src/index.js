@@ -97,17 +97,19 @@ function letsGo() {
 function isCollisions() {
     // Détecte les collisions aux bords :
     let borderCollision = false;
-    const nextHeadPosition = snake.advance("test");
 
     switch (borderGameStyle) {
         case "walls":
+            const nextHeadPosition = snake.advance("test");
             borderCollision =
                 nextHeadPosition.x < 0 ||
                 nextHeadPosition.x > maxCellsInWidth - 1 ||
                 nextHeadPosition.y < 0 ||
                 nextHeadPosition.y > maxCellsInHeight - 1;
+            if (!borderCollision) snake.advance();
             break;
         case "mirror":
+            snake.advance();
             if (snake.head.x < 0) snake.head.x = maxCellsInWidth - 1;
             if (snake.head.x > maxCellsInWidth - 1) snake.head.x = 0;
             if (snake.head.y < 0) snake.head.y = maxCellsInHeight - 1;
@@ -128,31 +130,33 @@ function gameOver() {
 let startGameOverAnimation;
 const gray = new Color(0, 0, 40, 0);
 function drawGameOver(timeStamp) {
-    if (startGameOverAnimation != null) gray.alpha = 0;
-    startGameOverAnimation ??= timeStamp;
-    const delay = timeStamp - startGameOverAnimation;
-    if (gray.alpha < 70) gray.alpha = delay / 15;
+    if (!snake.life) {
+        if (startGameOverAnimation != null) gray.alpha = 0;
+        startGameOverAnimation ??= timeStamp;
+        const delay = timeStamp - startGameOverAnimation;
+        if (gray.alpha < 70) gray.alpha = delay / 15;
 
-    contexte.save();
-    contexte.beginPath();
+        contexte.save();
+        contexte.beginPath();
 
-    style.snakeColor = COLORS.red;
-    snake.draw(style);
-    apple.draw();
+        style.snakeColor = COLORS.red;
+        snake.draw(style);
+        apple.draw();
 
-    contexte.fillStyle = gray.toHsl();
-    contexte.fillRect(0, 0, canvasWidth, canvasHeight);
+        contexte.fillStyle = gray.toHsl();
+        contexte.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    fontSize = 80;
-    contexte.fillStyle = COLORS.oldWhite;
-    contexte.font = messagesStyle();
+        fontSize = 80;
+        contexte.fillStyle = COLORS.oldWhite;
+        contexte.font = messagesStyle();
 
-    delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 1.6 * fontSize);
-    delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
-    delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 1.3 * fontSize);
-    contexte.restore();
+        delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 1.6 * fontSize);
+        delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
+        delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 1.3 * fontSize);
+        contexte.restore();
 
-    delay <= 800 && requestAnimationFrame(drawGameOver);
+        delay <= 800 && requestAnimationFrame(drawGameOver);
+    }
 }
 
 // Quand le serpent mange une pomme :
@@ -171,8 +175,8 @@ function scoreThatApple() {
 
 // Remet à 0 le jeu après un game-over :
 function reload() {
-    snake.rebornWith(snakeStartingBody);
     style.snakeColor = COLORS.green;
+    snake.rebornWith(snakeStartingBody);
 
     score = 0;
     tryAgain = false;
@@ -185,7 +189,7 @@ function refreshCanvas() {
     if (!pause) {
         snake.waitForRefresh = false;
 
-        snake.advance();
+        //snake.advance();
 
         isCollisions() && gameOver(); // Game-over en cas de collision.
 

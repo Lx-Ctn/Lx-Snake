@@ -164,7 +164,7 @@ h2 {
   left: 50%;
   transform: translateX(-50%);
   background-color: var(--oldWhite);
-  font-size: 1.8rem;
+  font-size: 2rem;
 }
 @media (min-width: 715px) { 
   #setting { 
@@ -260,7 +260,8 @@ label input {
 /* Créer un bouton radio personnalisé */
 .checkmark {
   position: absolute;
-  top: 0;
+  top: 50%;
+  transform: translateY(calc(-50% + .1em));
   left: 0px;
   height: 25px;
   width: 25px;
