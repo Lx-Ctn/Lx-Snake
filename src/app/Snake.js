@@ -61,7 +61,7 @@ export class Snake {
     }
 
     // Fait avancer le serpent selon la direction :
-    advance() {
+    advance(test = "") {
         let nextCell = new SnakeCell([this.head.x, this.head.y], this.head.direction);
         switch (this.#nextDirection) {
             case "right":
@@ -84,9 +84,11 @@ export class Snake {
                 throw "Invalid direction";
         }
 
-        this.body.unshift(nextCell);
-        if (!this.#appleEaten) {
-            this.body.pop();
+        if (test === "test") {
+            return nextCell;
+        } else {
+            this.body.unshift(nextCell);
+            !this.#appleEaten && this.body.pop();
         }
     }
 

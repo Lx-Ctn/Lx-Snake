@@ -7,18 +7,19 @@ export default {
 };
 
 class Color {
-    /*  Crée un objet couleur au format hsl + alpha optionnel
+    /*  Créé un objet couleur au format hsl + alpha optionnel
         Permet d'intéragir facilement avec la couleur,
         Par exemple d'accéder facilement aux nuances et ombres d'une couleur en variant la propriétés de luminosité.
 
         On peut passer un autre object Color en paramètre :
         Il sera la référence pour garder un lien dynamique avec ses propriétés :
             const mainColor = new Color(360, 90, 70);
-            const darkMainColor = new Color(color, null, 10);
+            const darkMainColor = new Color(color, null, -30);
             color.hue = 30; 
-            => darkMainColor : (30, 90, 10)
+            => darkMainColor : (30, 90, 40)
         La nouvelle instance hérite des changements sur la référence, sauf si la propriété est écrasée sur la nouvelle.
-        => Idéal pour la gestion dynamique de thème de couleur
+        Les propriétés Offset permettent un décalage dynamique avec la valeur de référence.
+        => Idéal pour la gestion dynamique de thème de couleurs
    */
 
     #colorReference;
@@ -36,11 +37,11 @@ class Color {
             this.#colorReference = ColorOrHue;
             switch (arguments.length) {
                 case 4:
-                    this.#alpha = alpha > 100 ? 100 : alpha < 0 ? 0 : alpha;
+                    this.alphaOffset = alpha;
                 case 3:
-                    this.#light = light > 100 ? 100 : light < 0 ? 0 : light;
+                    this.lightOffset = light;
                 case 2:
-                    this.#saturation = saturation > 100 ? 100 : saturation < 0 ? 0 : saturation;
+                    this.saturationOffset = saturation;
                 default:
                     break;
             }
@@ -55,12 +56,17 @@ class Color {
             this.#saturation = saturation > 100 ? 100 : saturation < 0 ? 0 : saturation;
             this.#light = light > 100 ? 100 : light < 0 ? 0 : light;
             this.#alpha = alpha > 100 ? 100 : alpha < 0 ? 0 : alpha;
+
+            this.hueOffset = 0;
+            this.saturationOffset = 0;
+            this.lightOffset = 0;
+            this.alphaOffset = 0;
         }
     }
 
     // Hue :
     get hue() {
-        return this.#hue ? this.#hue : this.#colorReference.hue;
+        return this.#hue ? this.#hue : this.#colorReference.hue + this.hueOffset;
     }
     set hue(hue) {
         this.#hue = hue > 360 ? hue % 360 : hue < 0 ? (hue % 360) + 360 : hue;
@@ -68,7 +74,9 @@ class Color {
 
     // Saturation :
     get saturation() {
-        return this.#saturation ? this.#saturation : this.#colorReference.saturation;
+        return this.#saturation
+            ? this.#saturation
+            : this.#colorReference.saturation + this.saturationOffset;
     }
     set saturation(saturation) {
         this.#saturation = saturation > 100 ? 100 : saturation < 0 ? 0 : saturation;
@@ -76,7 +84,7 @@ class Color {
 
     // Light :
     get light() {
-        return this.#light ? this.#light : this.#colorReference.light;
+        return this.#light ? this.#light : this.#colorReference.light + this.lightOffset;
     }
     set light(light) {
         this.#light = light > 100 ? 100 : light < 0 ? 0 : light;
@@ -84,7 +92,7 @@ class Color {
 
     // Alpha :
     get alpha() {
-        return this.#alpha ? this.#alpha : this.#colorReference.alpha;
+        return this.#alpha ? this.#alpha : this.#colorReference.alpha + this.alphaOffset;
     }
     set alpha(alpha) {
         this.#alpha = alpha > 100 ? 100 : alpha < 0 ? 0 : alpha;

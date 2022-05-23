@@ -4,24 +4,25 @@ import { Snake } from "./app/Snake.js";
 import { Skins } from "./app/GameSkins.js";
 
 /** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
-export const canvasWidth = 780;
-export const canvasHeight = 600;
-export const cellSize = 30;
+const canvasWidth = 780;
+const canvasHeight = 600;
+const cellSize = 30;
 const maxCellsInWidth = canvasWidth / cellSize;
 const maxCellsInHeight = canvasHeight / cellSize;
 
-export let contexte;
-let pause;
 const pauseElement = document.getElementById("pause");
 const gameOverElement = document.getElementById("gameOver");
 const footerElement = document.getElementById("footer");
 const mainElement = document.getElementById("main");
+
+let contexte;
+let pause;
 let tryAgain = false;
 let gameLoopDelay = 140;
 const minGameLoopDelay = 40;
 
 let borderGameStyle;
-export let gameStyle = "classic";
+let gameStyle = "classic";
 let style;
 
 let snake;
@@ -37,6 +38,9 @@ let appleColor = COLORS.red;
 let score = 0;
 const lastBestScore = localStorage.getItem("snakeBestScore");
 let bestScore = lastBestScore ? +lastBestScore : 0;
+
+let fontSize = "5em";
+const messagesStyle = `bold ${fontSize} monospace`;
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - ajouter un vrai menu différentes catégories ?
@@ -78,7 +82,7 @@ function init() {
 function letsGo() {
     contexte.clearRect(0, 0, canvas.width, canvas.height);
     contexte.fillStyle = snakeColor;
-    contexte.font = "40px monospace";
+    contexte.font = messagesStyle;
     contexte.textBaseline = "middle";
     contexte.textAlign = "center";
 
@@ -103,13 +107,15 @@ function reload() {
 function isCollisions() {
     // Détecte les collisions aux bords :
     let borderCollision = false;
+    const nextHeadPosition = snake.advance("test");
+
     switch (borderGameStyle) {
         case "walls":
             borderCollision =
-                snake.head.x < 0 ||
-                snake.head.x > maxCellsInWidth - 1 ||
-                snake.head.y < 0 ||
-                snake.head.y > maxCellsInHeight - 1;
+                nextHeadPosition.x < 0 ||
+                nextHeadPosition.x > maxCellsInWidth - 1 ||
+                nextHeadPosition.y < 0 ||
+                nextHeadPosition.y > maxCellsInHeight - 1;
             break;
         case "mirror":
             if (snake.head.x < 0) snake.head.x = maxCellsInWidth - 1;
@@ -127,7 +133,20 @@ function isCollisions() {
 function gameOver() {
     snake.life = false;
     style.snakeColor = COLORS.red;
-    document.getElementById("gameOver").style.display = "block";
+    snake.draw(style);
+    drawGameOver();
+    //document.getElementById("gameOver").style.display = "block";
+}
+
+function drawGameOver() {
+    contexte.save();
+    contexte.beginPath();
+    contexte.fillStyle = "#333c";
+    contexte.fillRect(0, 0, canvasWidth, canvasHeight);
+    contexte.fillStyle = COLORS.oldWhite;
+    fontSize = "7em";
+    contexte.fillText("- Game over -", canvasWidth / 2, canvasHeight / 2);
+    contexte.restore();
 }
 
 // Quand le serpent mange une pomme :
@@ -163,6 +182,7 @@ function refreshCanvas() {
         if (snake.life) {
             setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
         } else {
+            drawGameOver();
             reload();
         }
     }
@@ -220,14 +240,23 @@ function pauseOrReload() {
     } else if (!pause) {
         // Sinon on gère la mise en pause
         pause = true;
-        canvas.style.backgroundColor = "#777";
-        pauseElement.style.display = "block";
+        drawPause();
     } else {
         pause = false;
-        canvas.style.backgroundColor = COLORS.oldWhite;
-        pauseElement.style.display = "none";
         requestAnimationFrame(refreshCanvas);
     }
+}
+
+// Affichage de la pause :
+function drawPause() {
+    contexte.save();
+    contexte.beginPath();
+    contexte.fillStyle = "#333c";
+    contexte.fillRect(0, 0, canvasWidth, canvasHeight);
+    contexte.fillStyle = COLORS.oldWhite;
+    fontSize = "7em";
+    contexte.fillText("- Pause -", canvasWidth / 2, canvasHeight / 2);
+    contexte.restore();
 }
 
 // Met à jour l'affichage des scores :
@@ -374,6 +403,7 @@ function selectingStyle(event) {
     contexte.clearRect(0, 0, canvas.width, canvas.height);
     apple.draw();
     snake.draw(style);
+    drawPause();
 }
 /*
 

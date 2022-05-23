@@ -62,14 +62,15 @@ export function Skins(gameStyle, contexte, cellSize) {
 
     switch (gameStyle) {
         case "bigHead":
-            this.head = function () {
+            this.head2 = function () {
                 this.isCoordinates();
                 const headScale = 1.2; // Echelle : it's a BIG head !
-                const headShift = (cellSize * headScale) / 4; // Décalage : la tête dépasse en arrière
+                const headXOffset = (cellSize * headScale) / 4; // Décalage : la tête dépasse en arrière
 
                 // On déplace le canvas au niveau de notre centre de rotation :
-                contexte.translate(this.x - headShift + radius, this.y - headScale / 2 + radius); // On tiens de l'échelle et du décalage pour center la cellule modifiée
+                contexte.translate(this.x - headXOffset + radius, this.y - headScale / 2 + radius); // On tiens de l'échelle et du décalage pour center la cellule modifiée
                 contexte.rotate(Math.PI * 0.25);
+
                 contexte.rect(
                     (-headScale * cellSize) / 2,
                     (-headScale * cellSize) / 2,
@@ -77,14 +78,75 @@ export function Skins(gameStyle, contexte, cellSize) {
                     headScale * cellSize
                 );
                 contexte.rotate(Math.PI * -0.25);
-                contexte.translate(-this.x + headShift - radius, -this.y + headScale / 2 - radius); // On remet le canvas en place
+                contexte.translate(
+                    -this.x + headXOffset - radius,
+                    -this.y + headScale / 2 - radius
+                ); // On remet le canvas en place
 
                 contexte.arc(
-                    this.x + radius * headScale,
+                    this.x + (radius - 0.5) * headScale,
                     this.y + radius,
                     radius / headScale,
                     0,
                     Math.PI * 2
+                );
+
+                contexte.fill();
+
+                // Yeux :
+                contexte.beginPath();
+                contexte.fillStyle = COLORS.red;
+                const eyeRadius = radius / headScale / 2.6;
+                const eyeYOffset = radius / 1.7;
+                contexte.arc(
+                    this.x + radius / headScale,
+                    this.y + eyeYOffset,
+                    eyeRadius,
+                    Math.PI * 1.15,
+                    Math.PI * 2.15
+                );
+                contexte.fill();
+                contexte.beginPath();
+                contexte.arc(
+                    this.x + radius / headScale,
+                    this.y + cellSize - eyeYOffset,
+                    eyeRadius,
+                    Math.PI * -0.15,
+                    Math.PI * 0.85
+                );
+                contexte.fill();
+            };
+
+            this.head = function () {
+                this.isCoordinates();
+                const headScale = 1.2; // Echelle : it's a BIG head !
+                const headXOffset = (cellSize * headScale) / 4; // Décalage : la tête dépasse en arrière
+                const headLength = 1.4; // Longeur de la tête en avant
+
+                contexte.arc(
+                    this.x + radius - headXOffset,
+                    this.y + radius,
+                    headScale * radius,
+                    Math.PI * 0.5,
+                    Math.PI * 1.5
+                );
+                contexte.ellipse(
+                    this.x + radius - headXOffset,
+                    this.y + radius,
+                    headScale * radius * headLength,
+                    headScale * radius,
+                    0,
+                    Math.PI * 1.5,
+                    Math.PI * 0.5
+                );
+                contexte.ellipse(
+                    this.x + radius - headLength / headScale,
+                    this.y + radius,
+                    headScale * radius * headLength,
+                    radius * 0.9,
+                    0,
+                    Math.PI * 1.5,
+                    Math.PI * 0.5
                 );
                 contexte.fill();
 
@@ -92,31 +154,38 @@ export function Skins(gameStyle, contexte, cellSize) {
                 contexte.beginPath();
                 contexte.fillStyle = COLORS.red;
                 const eyeRadius = radius / headScale / 2.6;
+                const eyeYOffset = radius / 1.7;
                 contexte.arc(
-                    this.x + eyeRadius * headScale,
-                    this.y + eyeRadius,
+                    this.x + radius,
+                    this.y + eyeYOffset,
                     eyeRadius,
-                    0,
-                    Math.PI * 2
+                    Math.PI * 1.15,
+                    Math.PI * 2.15
                 );
+                contexte.fill();
+                contexte.beginPath();
                 contexte.arc(
-                    this.x + eyeRadius * headScale,
-                    this.y + cellSize - eyeRadius,
+                    this.x + radius,
+                    this.y + cellSize - eyeYOffset,
                     eyeRadius,
-                    0,
-                    Math.PI * 2
+                    Math.PI * -0.15,
+                    Math.PI * 0.85
                 );
+                contexte.fill();
             };
+
             this.body = function () {
                 this.isCoordinates();
                 contexte.fillRect(this.x, this.y, cellSize, cellSize); // (position x, position y, largeur, hauteur).
             };
+
             this.turn = function (turn) {
                 this.isCoordinates();
                 contexte.rect(this.x, this.y, radius, cellSize);
                 contexte.rect(this.x, this.y + (turn == "right" ? radius : 0), cellSize, radius);
                 contexte.arc(this.x + radius, this.y + radius, radius, 0, Math.PI * 2);
             };
+
             this.tail = function () {
                 this.isCoordinates();
                 contexte.rect(this.x + radius, this.y, radius, cellSize);
