@@ -6,7 +6,7 @@ export default {
     oldWhite: rootCSSStyles.getPropertyValue("--oldWhite"),
 };
 
-class Color {
+export class Color {
     /*  Créé un objet couleur au format hsl + alpha optionnel
         Permet d'intéragir facilement avec la couleur,
         Par exemple d'accéder facilement aux nuances et ombres d'une couleur en variant la propriétés de luminosité.
@@ -48,11 +48,7 @@ class Color {
             // Si on créer une Color :
         } else {
             this.#hue =
-                ColorOrHue > 360
-                    ? ColorOrHue % 360
-                    : ColorOrHue < 0
-                    ? (ColorOrHue % 360) + 360
-                    : ColorOrHue;
+                ColorOrHue > 360 ? ColorOrHue % 360 : ColorOrHue < 0 ? (ColorOrHue % 360) + 360 : ColorOrHue;
             this.#saturation = saturation > 100 ? 100 : saturation < 0 ? 0 : saturation;
             this.#light = light > 100 ? 100 : light < 0 ? 0 : light;
             this.#alpha = alpha > 100 ? 100 : alpha < 0 ? 0 : alpha;
@@ -74,9 +70,7 @@ class Color {
 
     // Saturation :
     get saturation() {
-        return this.#saturation
-            ? this.#saturation
-            : this.#colorReference.saturation + this.saturationOffset;
+        return this.#saturation ? this.#saturation : this.#colorReference.saturation + this.saturationOffset;
     }
     set saturation(saturation) {
         this.#saturation = saturation > 100 ? 100 : saturation < 0 ? 0 : saturation;
