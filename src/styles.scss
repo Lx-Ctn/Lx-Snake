@@ -19,8 +19,13 @@ body {
   height: 100vh;
   background-color: var(--green);
 }
+/*
 
-/*** Header ***/
+
+*/
+/****************/
+/***  Header  ***/
+/****************/
 
 header {
   background-color: var(--green);
@@ -105,8 +110,14 @@ h1 {
     align-items: flex-end;
   }
 }
+/*
 
-/*** Élements de jeu ***/
+
+
+*/
+/*************************/
+/***  Élements de jeu  ***/
+/*************************/
 
 main {
   position: relative;
@@ -266,8 +277,14 @@ label:hover input ~ .checkmark {
 label input:checked ~ .checkmark {
   background-color: var(--red);
 }
+/*
 
-/*** Footer ***/
+
+
+*/
+/****************/
+/***  Footer  ***/
+/****************/
 
 footer {
   display: flex;

@@ -62,7 +62,7 @@ export class Color {
 
     // Hue :
     get hue() {
-        return this.#hue ? this.#hue : this.#colorReference.hue + this.hueOffset;
+        return this.#hue ?? this.#colorReference.hue + this.hueOffset;
     }
     set hue(hue) {
         this.#hue = hue > 360 ? hue % 360 : hue < 0 ? (hue % 360) + 360 : hue;
@@ -70,7 +70,7 @@ export class Color {
 
     // Saturation :
     get saturation() {
-        return this.#saturation ? this.#saturation : this.#colorReference.saturation + this.saturationOffset;
+        return this.#saturation ?? this.#colorReference.saturation + this.saturationOffset;
     }
     set saturation(saturation) {
         this.#saturation = saturation > 100 ? 100 : saturation < 0 ? 0 : saturation;
@@ -78,7 +78,7 @@ export class Color {
 
     // Light :
     get light() {
-        return this.#light ? this.#light : this.#colorReference.light + this.lightOffset;
+        return this.#light ?? this.#colorReference.light + this.lightOffset;
     }
     set light(light) {
         this.#light = light > 100 ? 100 : light < 0 ? 0 : light;
@@ -86,7 +86,7 @@ export class Color {
 
     // Alpha :
     get alpha() {
-        return this.#alpha ? this.#alpha : this.#colorReference.alpha + this.alphaOffset;
+        return this.#alpha ?? this.#colorReference.alpha + this.alphaOffset;
     }
     set alpha(alpha) {
         this.#alpha = alpha > 100 ? 100 : alpha < 0 ? 0 : alpha;

@@ -1,12 +1,15 @@
 import "./styles.scss";
-import COLORS from "./app/Colors.js";
+import COLORS, { Color } from "./app/Colors.js";
 import { Snake } from "./app/Snake.js";
 import { Skins } from "./app/GameSkins.js";
 
 /** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
-const canvasWidth = 780;
-const canvasHeight = 600;
-const cellSize = 30;
+
+// On tiens compte de la résolution de l'écran pour garder un affichage correct sur retina display : on multiplie la taille du canvas, puis divise en css
+const resolution = window.devicePixelRatio;
+const canvasWidth = resolution * 780;
+const canvasHeight = resolution * 600;
+const cellSize = resolution * 30;
 const maxCellsInWidth = canvasWidth / cellSize;
 const maxCellsInHeight = canvasHeight / cellSize;
 
@@ -39,8 +42,8 @@ let score = 0;
 const lastBestScore = localStorage.getItem("snakeBestScore");
 let bestScore = lastBestScore ? +lastBestScore : 0;
 
-let fontSize = "5em";
-const messagesStyle = `bold ${fontSize} monospace`;
+let fontSize = 50;
+const messagesStyle = () => `bold ${resolution * fontSize}px monospace`;
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - ajouter un vrai menu différentes catégories ?
@@ -59,8 +62,9 @@ function init() {
     function setCanvasSize() {
         headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
         canvas.style.maxWidth =
-            "min(" + canvasWidth + "px, calc((100vh - " + headerHeight + ")*" + ratio + "))";
-        canvas.style.maxHeight = "min(" + canvasHeight + "px, calc(100vh - " + headerHeight + "))";
+            "min(" + canvasWidth / resolution + "px, calc((100vh - " + headerHeight + ")*" + ratio + "))";
+        canvas.style.maxHeight =
+            "min(" + canvasHeight / resolution + "px, calc(100vh - " + headerHeight + "))";
     }
     setCanvasSize();
     window.addEventListener("resize", setCanvasSize);
@@ -82,25 +86,11 @@ function init() {
 function letsGo() {
     contexte.clearRect(0, 0, canvas.width, canvas.height);
     contexte.fillStyle = snakeColor;
-    contexte.font = messagesStyle;
+    contexte.font = messagesStyle();
     contexte.textBaseline = "middle";
     contexte.textAlign = "center";
 
     contexte.fillText("Let's go !", canvasWidth / 2, canvasHeight / 2);
-}
-
-// Remet à 0 le jeu après un game-over :
-function reload() {
-    // Redemarre seulement si la touche est pressée.
-    if (tryAgain) {
-        snake.rebornWith(snakeStartingBody);
-        style.snakeColor = COLORS.green;
-        gameOverElement.style.display = "none";
-        score = 0;
-        tryAgain = false;
-
-        requestAnimationFrame(refreshCanvas);
-    }
 }
 
 // Contrôle les collisions :
@@ -133,20 +123,36 @@ function isCollisions() {
 function gameOver() {
     snake.life = false;
     style.snakeColor = COLORS.red;
-    snake.draw(style);
-    drawGameOver();
-    //document.getElementById("gameOver").style.display = "block";
 }
 
-function drawGameOver() {
+let startGameOverAnimation;
+const gray = new Color(0, 0, 40, 0);
+function drawGameOver(timeStamp) {
+    if (startGameOverAnimation != null) gray.alpha = 0;
+    startGameOverAnimation ??= timeStamp;
+    const delay = timeStamp - startGameOverAnimation;
+    if (gray.alpha < 70) gray.alpha = delay / 15;
+
     contexte.save();
     contexte.beginPath();
-    contexte.fillStyle = "#333c";
+
+    style.snakeColor = COLORS.red;
+    snake.draw(style);
+    apple.draw();
+
+    contexte.fillStyle = gray.toHsl();
     contexte.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    fontSize = 80;
     contexte.fillStyle = COLORS.oldWhite;
-    fontSize = "7em";
-    contexte.fillText("- Game over -", canvasWidth / 2, canvasHeight / 2);
+    contexte.font = messagesStyle();
+
+    delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 1.6 * fontSize);
+    delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
+    delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 1.3 * fontSize);
     contexte.restore();
+
+    delay <= 800 && requestAnimationFrame(drawGameOver);
 }
 
 // Quand le serpent mange une pomme :
@@ -161,6 +167,17 @@ function scoreThatApple() {
     do {
         apple.setNewPosition();
     } while (apple.isOnSnake(snake));
+}
+
+// Remet à 0 le jeu après un game-over :
+function reload() {
+    snake.rebornWith(snakeStartingBody);
+    style.snakeColor = COLORS.green;
+
+    score = 0;
+    tryAgain = false;
+
+    requestAnimationFrame(refreshCanvas);
 }
 
 // Boucle de jeu principale :
@@ -182,8 +199,9 @@ function refreshCanvas() {
         if (snake.life) {
             setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
         } else {
-            drawGameOver();
-            reload();
+            startGameOverAnimation = null;
+            // Redemarre seulement si la touche est pressée.
+            tryAgain ? reload() : requestAnimationFrame(drawGameOver);
         }
     }
 }
@@ -254,8 +272,9 @@ function drawPause() {
     contexte.fillStyle = "#333c";
     contexte.fillRect(0, 0, canvasWidth, canvasHeight);
     contexte.fillStyle = COLORS.oldWhite;
-    fontSize = "7em";
-    contexte.fillText("- Pause -", canvasWidth / 2, canvasHeight / 2);
+    fontSize = 50;
+    contexte.font = messagesStyle();
+    contexte.fillText("|| Pause ||", canvasWidth / 2, canvasHeight / 2);
     contexte.restore();
 }
 
@@ -326,7 +345,7 @@ document.body.addEventListener("click", function (event) {
         pauseOrReload();
     }
     if (blockClickPropagation) blockClickPropagation = false;
-    // @ts-ignore
+
     if (!setting.contains(event.target) && setting.style.display == "block") {
         getSetting(event);
     }
@@ -439,7 +458,7 @@ document.onkeydown = function handleKeyDown(event) {
             break;
         case "Enter": // touche entrée
         case " ": // touche espace
-            pauseOrReload();
+            setting.style.display == "block" || pauseOrReload();
             break;
         default:
             return;
@@ -525,11 +544,7 @@ document.body.addEventListener(
             return;
         } // Annule l'event si le delai de rafraîchissement n'est pas atteint.
 
-        if (
-            event.target == canvas ||
-            event.target == footerElement ||
-            event.target == mainElement
-        ) {
+        if (event.target == canvas || event.target == footerElement || event.target == mainElement) {
             waitForMoveDelay = true;
             killTimeOut = false;
 
