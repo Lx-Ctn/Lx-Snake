@@ -1,4 +1,4 @@
-import "./styles.scss";
+import "./styles/styles.scss";
 import COLORS, { Color } from "./app/Colors.js";
 import { Snake } from "./app/Snake.js";
 import { Skins } from "./app/GameSkins.js";

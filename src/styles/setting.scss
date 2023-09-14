@@ -1,0 +1,148 @@
+/*
+
+
+
+*/
+/*****************/
+/***  Setting  ***/
+/*****************/
+
+#setting {
+	display: none;
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	width: 100%;
+	max-width: 780px;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: var(--oldWhite);
+	font-size: 2rem;
+	@media (min-width: 715px) {
+		bottom: 0;
+		overflow: auto;
+	}
+}
+
+#setting h2 {
+	text-align: center;
+	font-size: clamp(1.8rem, 10vw - 0.72rem, 3.6rem);
+	color: var(--green);
+
+	margin-top: 0.7em;
+}
+
+#exitSetting {
+	position: absolute;
+	top: 0;
+	right: 0;
+
+	font-size: min(1em, 2vw + 0.5em);
+	height: 3.1em;
+	width: 3.1em;
+
+	border: none;
+	background: none;
+	cursor: pointer;
+
+	--rotate: 45deg;
+	&:hover {
+		--rotate: 35deg;
+	}
+}
+.cross-bar {
+	position: absolute;
+	height: 0.1em;
+	width: 1.6em;
+	left: 50%;
+	translate: -50% 0;
+	border-radius: 0.1em;
+	background-color: var(--red);
+
+	transition: rotate 0.3s;
+}
+.bar-1 {
+	rotate: calc(var(--rotate) * -1);
+}
+.bar-2 {
+	rotate: var(--rotate);
+}
+
+form {
+	font-size: clamp(0.6em, 5vw, 1em);
+	padding: 1.1em 1em;
+	color: var(--green);
+}
+
+fieldset {
+	border: 1px solid var(--red);
+	border-radius: 1em;
+	padding: 1em 1.3em 0.3em 1.3em;
+
+	&:not(:last-child) {
+		margin-bottom: 1.3em;
+	}
+}
+
+legend {
+	position: relative;
+	padding: 0 0.7em 0.2em;
+	font-size: 1.3em;
+
+	#snakePreview {
+		width: calc(77vw - 100%);
+		position: absolute;
+		left: 6em;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+}
+
+.settingDescriptions {
+	font-size: 0.9em;
+	opacity: 0.7;
+}
+
+/**/
+
+/*** Gestion des boutons radio personnalisé ***/
+
+label {
+	display: block;
+	position: relative;
+	padding-left: calc(25px + 1em);
+	margin-bottom: 1.2em;
+	cursor: pointer;
+}
+
+/* Cache le bouton radio par défault */
+label input {
+	position: absolute;
+	opacity: 0;
+	cursor: pointer;
+}
+
+/* Créer un bouton radio personnalisé */
+.checkmark {
+	position: absolute;
+	top: 50%;
+	transform: translateY(calc(-50% + 0.1em));
+	left: 0px;
+	height: 25px;
+	width: 25px;
+	background-color: #fff;
+	border-radius: 50%;
+
+	transition: opacity 0.2s, background-color 0.2s;
+}
+
+/* Au survol : light */
+label:hover input:not(:checked) ~ .checkmark {
+	background-color: var(--red);
+	opacity: 0.4;
+}
+
+/* Pour la selection en cours : */
+label input:checked ~ .checkmark {
+	background-color: var(--red);
+}

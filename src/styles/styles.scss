@@ -1,0 +1,38 @@
+@import "header.scss";
+@import "setting.scss";
+@import "footer.scss";
+
+:root {
+	--green: hsl(160, 7%, 25%);
+	--red: hsl(345, 90%, 60%);
+	--oldWhite: hsl(34, 14%, 91%);
+
+	font-family: "Courier New", Courier, monospace;
+	font-size: 10px;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	background-color: var(--green);
+}
+
+main {
+	position: relative;
+	background-color: var(--green);
+}
+
+#mainGame {
+	background-color: var(--oldWhite);
+	width: 100%;
+	display: block;
+	margin: auto;
+	transition: max-width 0.2s, max-height 0.2s;
+}
