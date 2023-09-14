@@ -78,10 +78,7 @@ export function Skins(gameStyle, contexte, cellSize) {
                     headScale * cellSize
                 );
                 contexte.rotate(Math.PI * -0.25);
-                contexte.translate(
-                    -this.x + headXOffset - radius,
-                    -this.y + headScale / 2 - radius
-                ); // On remet le canvas en place
+                contexte.translate(-this.x + headXOffset - radius, -this.y + headScale / 2 - radius); // On remet le canvas en place
 
                 contexte.arc(
                     this.x + (radius - 0.5) * headScale,
@@ -155,13 +152,7 @@ export function Skins(gameStyle, contexte, cellSize) {
                 contexte.fillStyle = COLORS.red;
                 const eyeRadius = radius / headScale / 2.6;
                 const eyeYOffset = radius / 1.7;
-                contexte.arc(
-                    this.x + radius,
-                    this.y + eyeYOffset,
-                    eyeRadius,
-                    Math.PI * 1.15,
-                    Math.PI * 2.15
-                );
+                contexte.arc(this.x + radius, this.y + eyeYOffset, eyeRadius, Math.PI * 1.15, Math.PI * 2.15);
                 contexte.fill();
                 contexte.beginPath();
                 contexte.arc(
