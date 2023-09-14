@@ -43,8 +43,9 @@ let score = 0;
 const lastBestScore = localStorage.getItem("snakeBestScore");
 let bestScore = lastBestScore ? +lastBestScore : 0;
 
-let fontSize = 50;
-const messagesStyle = () => `bold ${resolution * fontSize}px monospace`;
+const defaultFontSize = 50;
+const messagesStyle = ({ fontSize } = { fontSize: defaultFontSize }) =>
+	`bold ${resolution * fontSize}px "Courier New", Courier, monospace`;
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - ajouter un vrai menu différentes catégories ?
@@ -146,9 +147,9 @@ function drawGameOver(timeStamp) {
 		contexte.fillStyle = gray.toHsl();
 		contexte.fillRect(0, 0, canvasWidth, canvasHeight);
 
-		fontSize = 80;
+		const fontSize = 80;
 		contexte.fillStyle = COLORS.oldWhite;
-		contexte.font = messagesStyle();
+		contexte.font = messagesStyle({ fontSize });
 
 		delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 0.8 * fontSize * resolution);
 		delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
@@ -278,7 +279,6 @@ function drawPause() {
 	contexte.fillStyle = "#333c";
 	contexte.fillRect(0, 0, canvasWidth, canvasHeight);
 	contexte.fillStyle = COLORS.oldWhite;
-	fontSize = 50;
 	contexte.font = messagesStyle();
 	contexte.fillText("|| Pause ||", canvasWidth / 2, canvasHeight / 2);
 	contexte.restore();

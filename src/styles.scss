@@ -1,241 +1,247 @@
 :root {
-  --green: hsl(160, 7%, 25%);
-  --red: hsl(345, 90%, 60%);
-  --oldWhite: hsl(34, 14%, 91%);
+	--green: hsl(160, 7%, 25%);
+	--red: hsl(345, 90%, 60%);
+	--oldWhite: hsl(34, 14%, 91%);
 
-  font-family: monospace;
-  font-size: 62.5%;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 10px;
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: var(--green);
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	background-color: var(--green);
 }
 /*
-
-
-*/
+ 
+ 
+ */
 /****************/
 /***  Header  ***/
 /****************/
 
 header {
-  background-color: var(--green);
-  min-height: 130px;
-  padding: 0 5vw;
+	background-color: var(--green);
+	min-height: 130px;
+	padding: 0 5vw;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 h1 {
-  display: inline-block;
-  font-family: "Coiny", cursive;
-  font-size: min(6rem, 12vw);
-  line-height: 0px;
+	display: inline-block;
+	font-family: "Coiny", cursive;
+	font-size: min(6rem, 12vw);
+	line-height: 0px;
 
-  color: white;
+	color: white;
 }
 
 #title span {
-  position: relative;
-  bottom: .03em;
-  font-family: serif;
-  font-size: 2em;
+	position: relative;
+	bottom: 0.03em;
+	font-family: serif;
+	font-size: 2em;
 
-  color: var(--red);
+	color: var(--red);
 }
 
 #navBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 300px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 300px;
 }
 
 #scores {
-  font-size: clamp(1.8em, 3.82vw + .58em, 3em);
-  color: white;
+	font-size: clamp(1.8em, 3.82vw + 0.58em, 3em);
+	color: white;
 }
 
 #settingIcon {
-  display: block;
-  height: 3.1rem;
-  width: 3.1rem;
-  transition: transform 1.1s;
+	display: block;
+	height: 3.1rem;
+	width: 3.1rem;
+	transition: transform 1.1s;
 }
 #settingIcon:hover {
-  transform: rotate(160deg);
+	transform: rotate(160deg);
 }
 
 @media (max-width: 875px) {
-  header { 
-    flex-direction: column;
-    justify-content: space-evenly; }
-  #navBar { 
-    width: 100%; 
-    align-items: center;}
-  #scores {
-    display: flex;
-    width: 100%;
-    max-width: 500px;
-    justify-content: space-between;}
-  #scores p {
-    margin-right: 5vw; }
+	header {
+		flex-direction: column;
+		justify-content: space-evenly;
+	}
+	#navBar {
+		width: 100%;
+		align-items: center;
+	}
+	#scores {
+		display: flex;
+		width: 100%;
+		max-width: 500px;
+		justify-content: space-between;
+	}
+	#scores p {
+		margin-right: 5vw;
+	}
 }
 
 @media (max-width: 300px) {
-  #scores {
-    flex-direction: column;
-  }
+	#scores {
+		flex-direction: column;
+	}
 }
 
 @media (max-height: 500px) {
-  header { 
-    min-height: 80px;
-    flex-direction: row; 
-  }
-  #navBar { font-size: .8em; }
-  #scores { 
-    flex-direction: column;
-    align-items: flex-end;
-  }
+	header {
+		min-height: 80px;
+		flex-direction: row;
+	}
+	#navBar {
+		font-size: 0.8em;
+	}
+	#scores {
+		flex-direction: column;
+		align-items: flex-end;
+	}
 }
 /*
-
-
-
-*/
+ 
+ 
+ 
+ */
 /*************************/
 /***  Élements de jeu  ***/
 /*************************/
 
 main {
-  position: relative;
-  background-color: var(--green);
+	position: relative;
+	background-color: var(--green);
 }
 
 #mainGame {
-  background-color: var(--oldWhite);
-  width: 100%;
-  display: block;
-  margin: auto;
+	background-color: var(--oldWhite);
+	width: 100%;
+	display: block;
+	margin: auto;
 }
 
 h2 {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 
-  font-size: min(5.4rem, 9vw);;
-  text-align: center;
-  color: var(--green);
+	font-size: min(5.4rem, 9vw);
+	text-align: center;
+	color: var(--green);
 }
 
 #pause {
-  color: #fff;
-  display: none;
+	color: #fff;
+	display: none;
 }
 
 #gameOver {
-  background-color: hsla(34, 14%, 91%, .5);
-  border-radius: 60px;
-  padding: .5em 1em .6em;
-  width: fit-content;
-  display: none;
+	background-color: hsla(34, 14%, 91%, 0.5);
+	border-radius: 60px;
+	padding: 0.5em 1em 0.6em;
+	width: fit-content;
+	display: none;
 }
 
 #setting {
-  display: none;
-  position: absolute;
-  top: 0;
-  width: 100%;
-  max-width: 780px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--oldWhite);
-  font-size: 2rem;
+	display: none;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	max-width: 780px;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: var(--oldWhite);
+	font-size: 2rem;
 }
-@media (min-width: 715px) { 
-  #setting { 
-    bottom: 0; 
-    overflow: auto;
-  }
+@media (min-width: 715px) {
+	#setting {
+		bottom: 0;
+		overflow: auto;
+	}
 }
-@media (max-width: 500px) { 
-  #setting { 
-    top: -52px; 
-    height: calc(100vh - 78px);
-  }
+@media (max-width: 500px) {
+	#setting {
+		top: -52px;
+		height: calc(100vh - 78px);
+	}
 }
 #setting h2 {
-  position: relative; /* Init du h2 général */
-  top: 0;
+	position: relative; /* Init du h2 général */
+	top: 0;
 
-  font-size: clamp(1.8rem, 10vw - .72rem, 3.6rem);
-  margin-top: 1em;
+	font-size: clamp(1.8rem, 10vw - 0.72rem, 3.6rem);
+	margin-top: 1em;
 }
 
 #exitSetting {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 2.5em;
-  width: 2.5em;
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 2.5em;
+	width: 2.5em;
 }
 #exitSetting span {
-  display: block;
-  position: absolute;
-  margin: 1.5em 1em 0 0;
-  height: .1em;
-  width: 1.6em;
-  border-radius: .1em;
-  background-color: var(--red);
-  transform: rotate(45deg);
+	display: block;
+	position: absolute;
+	margin: 1.5em 1em 0 0;
+	height: 0.1em;
+	width: 1.6em;
+	border-radius: 0.1em;
+	background-color: var(--red);
+	transform: rotate(45deg);
 }
 #exitSetting span:first-child {
-  transform: rotate(-45deg);
+	transform: rotate(-45deg);
 }
 
 form {
-  font-size: clamp(.6em, 5vw, 1em);
-  padding: 1.3em 1em;
-  color: var(--green);
+	font-size: clamp(0.6em, 5vw, 1em);
+	padding: 1.3em 1em;
+	color: var(--green);
 }
 
 fieldset {
-  border: 1px solid var(--red);
-  border-radius: 1em;
-  padding: 1em 1.3em 0.3em 1.3em;
-  margin-bottom: 1.3em;
+	border: 1px solid var(--red);
+	border-radius: 1em;
+	padding: 1em 1.3em 0.3em 1.3em;
+	margin-bottom: 1.3em;
 }
 
 legend {
-  display: flex;
-  align-items: center;
-  padding: 0 0.7em 0.2em;
-  font-size: 1.3em;
+	display: flex;
+	align-items: center;
+	padding: 0 0.7em 0.2em;
+	font-size: 1.3em;
 
-  #snakePreview {
-    position: absolute;
-    left: 8em;
-    margin-top: 0.2em;
-  }
+	#snakePreview {
+		position: absolute;
+		left: 8em;
+		margin-top: 0.2em;
+	}
 }
 
 .settingDescriptions {
-  font-size: 0.9em;
-  opacity: 0.7;
+	font-size: 0.9em;
+	opacity: 0.7;
 }
 
 /**/
@@ -243,67 +249,67 @@ legend {
 /*** Gestion des boutons radio personnalisé ***/
 
 label {
-  display: block;
-  position: relative;
-  padding-left: calc(25px + 1em);
-  margin-bottom: 1.2em;
-  cursor: pointer;
+	display: block;
+	position: relative;
+	padding-left: calc(25px + 1em);
+	margin-bottom: 1.2em;
+	cursor: pointer;
 }
 
 /* Cache le bouton radio par défault */
 label input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
+	position: absolute;
+	opacity: 0;
+	cursor: pointer;
 }
 
 /* Créer un bouton radio personnalisé */
 .checkmark {
-  position: absolute;
-  top: 50%;
-  transform: translateY(calc(-50% + .1em));
-  left: 0px;
-  height: 25px;
-  width: 25px;
-  background-color: #fff;
-  border-radius: 50%;
+	position: absolute;
+	top: 50%;
+	transform: translateY(calc(-50% + 0.1em));
+	left: 0px;
+	height: 25px;
+	width: 25px;
+	background-color: #fff;
+	border-radius: 50%;
 }
 
 /* Au survol : en gris */
 label:hover input ~ .checkmark {
-  background-color: #ccc;
+	background-color: #ccc;
 }
 
 /* Pour la selection en cours : */
 label input:checked ~ .checkmark {
-  background-color: var(--red);
+	background-color: var(--red);
 }
 /*
-
-
-
-*/
+ 
+ 
+ 
+ */
 /****************/
 /***  Footer  ***/
 /****************/
 
 footer {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding: 1.8em;
-  height: 100%;
-  min-height: 100px;
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+	padding: 1.8em;
+	height: 100%;
+	min-height: 100px;
 
-  font-size: 1.8em;
-  background-color: var(--green);
+	font-size: 1.2em;
+	background-color: var(--green);
 }
 
 ul {
-  list-style: none;
+	list-style: none;
 }
 
 a {
-  text-decoration: none;
-  color: var(--red);
+	text-decoration: none;
+	color: var(--red);
 }
