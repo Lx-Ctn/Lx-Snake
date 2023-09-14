@@ -13,8 +13,6 @@ const cellSize = resolution * 30;
 const maxCellsInWidth = canvasWidth / cellSize;
 const maxCellsInHeight = canvasHeight / cellSize;
 
-const pauseElement = document.getElementById("pause");
-const gameOverElement = document.getElementById("gameOver");
 const footerElement = document.getElementById("footer");
 const mainElement = document.getElementById("main");
 
@@ -349,13 +347,7 @@ function getSetting(event) {
 
 let blockClickPropagation = false;
 document.body.addEventListener("click", function (event) {
-	if (
-		(event.target == mainElement ||
-			event.target == canvas ||
-			event.target == pauseElement ||
-			event.target == gameOverElement) &&
-		!blockClickPropagation
-	) {
+	if ((event.target === mainElement || event.target === canvas) && !blockClickPropagation) {
 		pauseOrReload();
 	}
 	if (blockClickPropagation) blockClickPropagation = false;
@@ -518,13 +510,7 @@ document.body.addEventListener(
 	function (event) {
 		// Target : document au lieu de canvas pour inclure les éléments d'affichage "pause" & "Game Over"
 
-		if (
-			event.target == canvas ||
-			event.target == pauseElement ||
-			event.target == gameOverElement ||
-			event.target == footerElement ||
-			event.target == mainElement
-		) {
+		if (event.target == canvas || event.target == footerElement || event.target == mainElement) {
 			if (getComputedStyle(setting).display == "none") {
 				//event.preventDefault(); // Bloque l'appel de l'évenement "click" en même temps que le touch, sauf pour fermer les settings.
 				blockClickPropagation = true;
@@ -543,11 +529,7 @@ document.body.addEventListener(
 	"touchmove",
 	function (event) {
 		if (
-			(event.target == canvas ||
-				event.target == pauseElement ||
-				event.target == gameOverElement ||
-				event.target == footerElement ||
-				event.target == mainElement) &&
+			(event.target === canvas || event.target === footerElement || event.target === mainElement) &&
 			event.touches.length == 1 &&
 			!pause
 		) {
@@ -584,13 +566,7 @@ document.body.addEventListener(
 document.body.addEventListener(
 	"touchend",
 	function (event) {
-		if (
-			event.target == canvas ||
-			event.target == pauseElement ||
-			event.target == gameOverElement ||
-			event.target == footerElement ||
-			event.target == mainElement
-		) {
+		if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
 			timingEnd = performance.now();
 			let touchDelay = timingEnd - timingStart;
 
