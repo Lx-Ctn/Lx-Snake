@@ -30,9 +30,9 @@ let style;
 let snake;
 let snakeColor = COLORS.green;
 let snakeStartingBody = [
-	[5, 2, "right"],
-	[4, 2, "right"],
-	[3, 2, "right"],
+	{ coor: { x: 5, y: 2 }, direction: "right" },
+	{ coor: { x: 4, y: 2 }, direction: "right" },
+	{ coor: { x: 3, y: 2 }, direction: "right" },
 ];
 let apple;
 let appleColor = COLORS.red;
@@ -314,7 +314,7 @@ const snakePreviewCtx = snakePreviewCanvas.getContext("2d");
 let previewStyle;
 const snakePreviewBody = [];
 for (let i = 1; i <= SNAKE_PREVIEW_LENGTH; i++) {
-	snakePreviewBody.unshift([i, 1, "right"]);
+	snakePreviewBody.unshift({ coor: { x: i, y: 1 }, direction: "right" });
 }
 const snakePreview = new Snake(snakePreviewBody);
 
