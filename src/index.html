@@ -2,23 +2,18 @@
 
 <html>
 	<head>
-		<title>Lx Snake</title>
-
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 		<link href="https://fonts.googleapis.com/css?family=Coiny" rel="stylesheet" />
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-		<!-- <link href="styles-snake.css" rel="stylesheet" />
-        <script src="script-snake.js" type="module"></script> -->
+		<title>Lx Snake</title>
+		<meta name="description" content="A snake game running on JavaScript canvas" />
 	</head>
 
 	<body>
 		<header id="header">
-			<div id="title">
-				<h1>Lx Snake<span>...</span></h1>
-			</div>
+			<h1 id="title">Lx Snake<span>...</span></h1>
 
 			<div id="navBar">
 				<div id="scores">
@@ -34,7 +29,6 @@
 							/>
 							<circle cx="201.67" cy="202.25" r="116.5" stroke-miterlimit="10" />
 						</g>
-						)
 					</svg>
 				</div>
 			</div>
@@ -43,10 +37,10 @@
 		<main id="main">
 			<div id="setting">
 				<h2>Setting</h2>
-				<div id="exitSetting">
-					<span></span>
-					<span></span>
-				</div>
+				<button id="exitSetting" title="Exit setting">
+					<div class="cross-bar bar-1"></div>
+					<div class="cross-bar bar-2"></div>
+				</button>
 				<form>
 					<fieldset>
 						<legend>Gameplay :</legend>
