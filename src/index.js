@@ -21,7 +21,8 @@ const mainElement = document.getElementById("main");
 let contexte;
 let pause;
 let tryAgain = false;
-let gameLoopDelay = 140;
+const INITIAL_SPEED = 140;
+let gameLoopDelay = INITIAL_SPEED; // Time between frames : shorter increase game speed;
 const minGameLoopDelay = 40;
 
 let borderGameStyle;
@@ -31,9 +32,9 @@ let style;
 let snake;
 let snakeColor = COLORS.green;
 let snakeStartingBody = [
-    [5, 2, "right"],
-    [4, 2, "right"],
-    [3, 2, "right"],
+	[5, 2, "right"],
+	[4, 2, "right"],
+	[3, 2, "right"],
 ];
 let apple;
 let appleColor = COLORS.red;
@@ -54,243 +55,243 @@ const messagesStyle = () => `bold ${resolution * fontSize}px monospace`;
 init();
 
 function init() {
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    const ratio = canvasWidth / canvasHeight;
-    let headerHeight = "130px";
+	canvas.width = canvasWidth;
+	canvas.height = canvasHeight;
+	const ratio = canvasWidth / canvasHeight;
+	let headerHeight = "130px";
 
-    function setCanvasSize() {
-        headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
-        canvas.style.maxWidth =
-            "min(" + canvasWidth / resolution + "px, calc((100vh - " + headerHeight + ")*" + ratio + "))";
-        canvas.style.maxHeight =
-            "min(" + canvasHeight / resolution + "px, calc(100vh - " + headerHeight + "))";
-    }
-    setCanvasSize();
-    window.addEventListener("resize", setCanvasSize);
+	function setCanvasSize() {
+		headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
+		canvas.style.maxWidth =
+			"min(" + canvasWidth / resolution + "px, calc((100vh - " + headerHeight + ")*" + ratio + "))";
+		canvas.style.maxHeight = "min(" + canvasHeight / resolution + "px, calc(100vh - " + headerHeight + "))";
+	}
+	setCanvasSize();
+	window.addEventListener("resize", setCanvasSize);
 
-    pause = false;
-    borderGameStyle = "mirror";
-    contexte = canvas.getContext("2d");
+	pause = false;
+	borderGameStyle = "mirror";
+	contexte = canvas.getContext("2d");
 
-    style = new Skins(gameStyle, contexte, cellSize);
-    snake = new Snake(snakeStartingBody);
-    apple = new Apple([6, 8]);
+	style = new Skins(gameStyle, contexte, cellSize);
+	snake = new Snake(snakeStartingBody);
+	apple = new Apple([6, 8]);
 
-    getScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
-    letsGo();
-    setTimeout(requestAnimationFrame, 1000, refreshCanvas);
+	getScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
+	letsGo();
+	setTimeout(requestAnimationFrame, 1000, refreshCanvas);
 }
 
 // Affichage d'un texte d'intro :
 function letsGo() {
-    contexte.clearRect(0, 0, canvas.width, canvas.height);
-    contexte.fillStyle = snakeColor;
-    contexte.font = messagesStyle();
-    contexte.textBaseline = "middle";
-    contexte.textAlign = "center";
+	contexte.clearRect(0, 0, canvas.width, canvas.height);
+	contexte.fillStyle = snakeColor;
+	contexte.font = messagesStyle();
+	contexte.textBaseline = "middle";
+	contexte.textAlign = "center";
 
-    contexte.fillText("Let's go !", canvasWidth / 2, canvasHeight / 2);
+	contexte.fillText("Let's go !", canvasWidth / 2, canvasHeight / 2);
 }
 
 // Contrôle les collisions :
 function isCollisions() {
-    // Détecte les collisions aux bords :
-    let borderCollision = false;
+	// Détecte les collisions aux bords :
+	let borderCollision = false;
 
-    switch (borderGameStyle) {
-        case "walls":
-            const nextHeadPosition = snake.advance("test");
-            borderCollision =
-                nextHeadPosition.x < 0 ||
-                nextHeadPosition.x > maxCellsInWidth - 1 ||
-                nextHeadPosition.y < 0 ||
-                nextHeadPosition.y > maxCellsInHeight - 1;
-            if (!borderCollision) snake.advance();
-            break;
-        case "mirror":
-            snake.advance();
-            if (snake.head.x < 0) snake.head.x = maxCellsInWidth - 1;
-            if (snake.head.x > maxCellsInWidth - 1) snake.head.x = 0;
-            if (snake.head.y < 0) snake.head.y = maxCellsInHeight - 1;
-            if (snake.head.y > maxCellsInHeight - 1) snake.head.y = 0;
-            break;
-        default:
-            throw "Invalid Gameplay";
-    }
+	switch (borderGameStyle) {
+		case "walls":
+			const nextHeadPosition = snake.advance("test");
+			borderCollision =
+				nextHeadPosition.x < 0 ||
+				nextHeadPosition.x > maxCellsInWidth - 1 ||
+				nextHeadPosition.y < 0 ||
+				nextHeadPosition.y > maxCellsInHeight - 1;
+			if (!borderCollision) snake.advance();
+			break;
+		case "mirror":
+			snake.advance();
+			if (snake.head.x < 0) snake.head.x = maxCellsInWidth - 1;
+			if (snake.head.x > maxCellsInWidth - 1) snake.head.x = 0;
+			if (snake.head.y < 0) snake.head.y = maxCellsInHeight - 1;
+			if (snake.head.y > maxCellsInHeight - 1) snake.head.y = 0;
+			break;
+		default:
+			throw "Invalid Gameplay";
+	}
 
-    return borderCollision || snake.isAutoCollision(); // + Autocollision
+	return borderCollision || snake.isAutoCollision(); // + Autocollision
 }
 
 function gameOver() {
-    snake.life = false;
-    style.snakeColor = COLORS.red;
+	snake.life = false;
+	style.snakeColor = COLORS.red;
 }
 
 let startGameOverAnimation;
 const gray = new Color(0, 0, 40, 0);
 function drawGameOver(timeStamp) {
-    if (!snake.life) {
-        if (startGameOverAnimation != null) gray.alpha = 0;
-        startGameOverAnimation ??= timeStamp;
-        const delay = timeStamp - startGameOverAnimation;
-        if (gray.alpha < 70) gray.alpha = delay / 15;
+	if (!snake.life) {
+		if (startGameOverAnimation != null) gray.alpha = 0;
+		startGameOverAnimation ??= timeStamp;
+		const delay = timeStamp - startGameOverAnimation;
+		if (gray.alpha < 70) gray.alpha = delay / 15;
 
-        contexte.save();
-        contexte.beginPath();
+		contexte.save();
+		contexte.beginPath();
 
-        style.snakeColor = COLORS.red;
-        snake.draw(style);
-        apple.draw();
+		style.snakeColor = COLORS.red;
+		snake.draw(style);
+		apple.draw();
 
-        contexte.fillStyle = gray.toHsl();
-        contexte.fillRect(0, 0, canvasWidth, canvasHeight);
+		contexte.fillStyle = gray.toHsl();
+		contexte.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        fontSize = 80;
-        contexte.fillStyle = COLORS.oldWhite;
-        contexte.font = messagesStyle();
+		fontSize = 80;
+		contexte.fillStyle = COLORS.oldWhite;
+		contexte.font = messagesStyle();
 
-        delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 1.6 * fontSize);
-        delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
-        delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 1.3 * fontSize);
-        contexte.restore();
+		delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 1.6 * fontSize);
+		delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
+		delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 1.3 * fontSize);
+		contexte.restore();
 
-        delay <= 800 && requestAnimationFrame(drawGameOver);
-    }
+		delay <= 800 && requestAnimationFrame(drawGameOver);
+	}
 }
 
 // Quand le serpent mange une pomme :
 function scoreThatApple() {
-    score++;
-    if (score > bestScore) {
-        bestScore = score;
-    }
-    gameLoopDelay > minGameLoopDelay ? (gameLoopDelay -= 3) : (gameLoopDelay = minGameLoopDelay); // On accellère le jeu
+	score++;
+	if (score > bestScore) {
+		bestScore = score;
+	}
+	gameLoopDelay > minGameLoopDelay ? (gameLoopDelay -= 3) : (gameLoopDelay = minGameLoopDelay); // On accellère le jeu
 
-    // On génére une nouvelle pomme :
-    do {
-        apple.setNewPosition();
-    } while (apple.isOnSnake(snake));
+	// On génére une nouvelle pomme :
+	do {
+		apple.setNewPosition();
+	} while (apple.isOnSnake(snake));
 }
 
 // Remet à 0 le jeu après un game-over :
 function reload() {
-    style.snakeColor = COLORS.green;
-    snake.rebornWith(snakeStartingBody);
+	style.snakeColor = COLORS.green;
+	snake.rebornWith(snakeStartingBody);
 
-    score = 0;
-    tryAgain = false;
+	score = 0;
+	tryAgain = false;
+	gameLoopDelay = INITIAL_SPEED;
 
-    requestAnimationFrame(refreshCanvas);
+	requestAnimationFrame(refreshCanvas);
 }
 
 // Boucle de jeu principale :
 function refreshCanvas() {
-    if (!pause) {
-        snake.waitForRefresh = false;
+	if (!pause) {
+		snake.waitForRefresh = false;
 
-        //snake.advance();
+		//snake.advance();
 
-        isCollisions() && gameOver(); // Game-over en cas de collision.
+		isCollisions() && gameOver(); // Game-over en cas de collision.
 
-        snake.ate(apple) && scoreThatApple(); // Si le serpent mange une pomme.
-        getScore(); // Mise à jour de l'affichage des scores
+		snake.ate(apple) && scoreThatApple(); // Si le serpent mange une pomme.
+		getScore(); // Mise à jour de l'affichage des scores
 
-        contexte.clearRect(0, 0, canvas.width, canvas.height);
-        apple.draw();
-        snake.draw(style);
+		contexte.clearRect(0, 0, canvas.width, canvas.height);
+		apple.draw();
+		snake.draw(style);
 
-        if (snake.life) {
-            setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
-        } else {
-            startGameOverAnimation = null;
-            // Redemarre seulement si la touche est pressée.
-            tryAgain ? reload() : requestAnimationFrame(drawGameOver);
-        }
-    }
+		if (snake.life) {
+			setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
+		} else {
+			startGameOverAnimation = null;
+			// Redemarre seulement si la touche est pressée.
+			tryAgain ? reload() : requestAnimationFrame(drawGameOver);
+		}
+	}
 }
 
 // Construit l'objet pomme :
 function Apple(coordonnees) {
-    this.x = coordonnees[0];
-    this.y = coordonnees[1];
+	this.x = coordonnees[0];
+	this.y = coordonnees[1];
 
-    // Dessine une pomme :
-    this.draw = function () {
-        contexte.save(); // enregistre les paramètres actuels du contexte.
-        contexte.fillStyle = appleColor;
-        contexte.beginPath();
+	// Dessine une pomme :
+	this.draw = function () {
+		contexte.save(); // enregistre les paramètres actuels du contexte.
+		contexte.fillStyle = appleColor;
+		contexte.beginPath();
 
-        const radius = cellSize / 2;
-        const x = this.x * cellSize;
-        const y = this.y * cellSize;
+		const radius = cellSize / 2;
+		const x = this.x * cellSize;
+		const y = this.y * cellSize;
 
-        gameStyle === "classic"
-            ? contexte.rect(x + 3, y + 3, cellSize - 6, cellSize - 6)
-            : gameStyle === "full"
-            ? contexte.rect(x, y, cellSize, cellSize)
-            : contexte.arc(x + radius, y + radius, radius, 0, Math.PI * 2, true); // x, y : coordonnées du centre, rayon, angleDépart, angleFin (Math.PI * 2 : cercle complet, Math.PI : demi-cercle), sensAntiHoraire.
+		gameStyle === "classic"
+			? contexte.rect(x + 3, y + 3, cellSize - 6, cellSize - 6)
+			: gameStyle === "full"
+			? contexte.rect(x, y, cellSize, cellSize)
+			: contexte.arc(x + radius, y + radius, radius, 0, Math.PI * 2, true); // x, y : coordonnées du centre, rayon, angleDépart, angleFin (Math.PI * 2 : cercle complet, Math.PI : demi-cercle), sensAntiHoraire.
 
-        contexte.fill();
-        contexte.restore(); // puis les restore pour éviter de dessiner les nouvelles parties du serpents couleur pomme.
-    };
+		contexte.fill();
+		contexte.restore(); // puis les restore pour éviter de dessiner les nouvelles parties du serpents couleur pomme.
+	};
 
-    // Définie de nouvelle coordonnées aléatoires :
-    this.setNewPosition = function () {
-        this.x = Math.floor(Math.random() * maxCellsInWidth);
-        this.y = Math.floor(Math.random() * maxCellsInHeight);
-    };
+	// Définie de nouvelle coordonnées aléatoires :
+	this.setNewPosition = function () {
+		this.x = Math.floor(Math.random() * maxCellsInWidth);
+		this.y = Math.floor(Math.random() * maxCellsInHeight);
+	};
 
-    // Vérifie si les coordonnées ne sont pas sur le serpent :
-    this.isOnSnake = function (snakeToCheck) {
-        let isOnSnake = false;
-        for (let i = 0; i < snakeToCheck.body.length; i++) {
-            if (this.x === snakeToCheck.body[i].x && this.y === snakeToCheck.body[i].y) {
-                isOnSnake = true;
-            }
-        }
-        return isOnSnake;
-    };
+	// Vérifie si les coordonnées ne sont pas sur le serpent :
+	this.isOnSnake = function (snakeToCheck) {
+		let isOnSnake = false;
+		for (let i = 0; i < snakeToCheck.body.length; i++) {
+			if (this.x === snakeToCheck.body[i].x && this.y === snakeToCheck.body[i].y) {
+				isOnSnake = true;
+			}
+		}
+		return isOnSnake;
+	};
 }
 
 // Gestion de la mise en pause et relance après un game over :
 function pauseOrReload() {
-    if (!snake.life) {
-        // Si gameOver :
-        tryAgain = true;
-        reload(); // On relance
-    } else if (!pause) {
-        // Sinon on gère la mise en pause
-        pause = true;
-        drawPause();
-    } else {
-        pause = false;
-        requestAnimationFrame(refreshCanvas);
-    }
+	if (!snake.life) {
+		// Si gameOver :
+		tryAgain = true;
+		reload(); // On relance
+	} else if (!pause) {
+		// Sinon on gère la mise en pause
+		pause = true;
+		drawPause();
+	} else {
+		pause = false;
+		requestAnimationFrame(refreshCanvas);
+	}
 }
 
 // Affichage de la pause :
 function drawPause() {
-    contexte.save();
-    contexte.beginPath();
-    contexte.fillStyle = "#333c";
-    contexte.fillRect(0, 0, canvasWidth, canvasHeight);
-    contexte.fillStyle = COLORS.oldWhite;
-    fontSize = 50;
-    contexte.font = messagesStyle();
-    contexte.fillText("|| Pause ||", canvasWidth / 2, canvasHeight / 2);
-    contexte.restore();
+	contexte.save();
+	contexte.beginPath();
+	contexte.fillStyle = "#333c";
+	contexte.fillRect(0, 0, canvasWidth, canvasHeight);
+	contexte.fillStyle = COLORS.oldWhite;
+	fontSize = 50;
+	contexte.font = messagesStyle();
+	contexte.fillText("|| Pause ||", canvasWidth / 2, canvasHeight / 2);
+	contexte.restore();
 }
 
 // Met à jour l'affichage des scores :
 function getScore() {
-    document.getElementById("currentScore").innerHTML = score.toString(); // innerHTML correspond au texte entre les tags html de l'élément sélectionné.
-    document.getElementById("bestScore").innerHTML = bestScore.toString();
-    try {
-        localStorage.setItem("snakeBestScore", bestScore.toString());
-    } catch (error) {
-        console.log(error);
-    }
+	document.getElementById("currentScore").innerHTML = score.toString(); // innerHTML correspond au texte entre les tags html de l'élément sélectionné.
+	document.getElementById("bestScore").innerHTML = bestScore.toString();
+	try {
+		localStorage.setItem("snakeBestScore", bestScore.toString());
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 // Gestion de l'affichage du menu de réglage :
@@ -306,27 +307,27 @@ const snakePreviewCtx = snakePreviewCanvas.getContext("2d");
 let previewStyle;
 const snakePreviewBody = [];
 for (let i = 1; i <= snakePreviewLength; i++) {
-    snakePreviewBody.unshift([i, 1, "right"]);
+	snakePreviewBody.unshift([i, 1, "right"]);
 }
 const snakePreview = new Snake(snakePreviewBody);
 
 function getSnakePreview() {
-    snakePreviewCtx.clearRect(0, 0, snakePreviewCanvas.width, snakePreviewCanvas.height);
-    previewStyle = new Skins(gameStyle, snakePreviewCtx, PreviewcellSize);
-    snakePreview.draw(previewStyle);
+	snakePreviewCtx.clearRect(0, 0, snakePreviewCanvas.width, snakePreviewCanvas.height);
+	previewStyle = new Skins(gameStyle, snakePreviewCtx, PreviewcellSize);
+	snakePreview.draw(previewStyle);
 }
 
 settingIcon.addEventListener("click", getSetting);
 exitIcon.addEventListener("click", getSetting);
 
 function getSetting(event) {
-    event.stopPropagation();
+	event.stopPropagation();
 
-    if (!pause && snake.life) {
-        pauseOrReload();
-    }
-    getSnakePreview();
-    setting.style.display = setting.style.display == "block" ? "none" : "block";
+	if (!pause && snake.life) {
+		pauseOrReload();
+	}
+	getSnakePreview();
+	setting.style.display = setting.style.display == "block" ? "none" : "block";
 }
 
 /*
@@ -339,94 +340,94 @@ function getSetting(event) {
 
 let blockClickPropagation = false;
 document.body.addEventListener("click", function (event) {
-    if (
-        (event.target == mainElement ||
-            event.target == canvas ||
-            event.target == pauseElement ||
-            event.target == gameOverElement) &&
-        !blockClickPropagation
-    ) {
-        pauseOrReload();
-    }
-    if (blockClickPropagation) blockClickPropagation = false;
+	if (
+		(event.target == mainElement ||
+			event.target == canvas ||
+			event.target == pauseElement ||
+			event.target == gameOverElement) &&
+		!blockClickPropagation
+	) {
+		pauseOrReload();
+	}
+	if (blockClickPropagation) blockClickPropagation = false;
 
-    if (!setting.contains(event.target) && setting.style.display == "block") {
-        getSetting(event);
-    }
+	if (!setting.contains(event.target) && setting.style.display == "block") {
+		getSetting(event);
+	}
 });
 
 // Gestion du selecteur de mode de jeu :
 const gamePlaySelector = document.getElementsByClassName("gamePlaySelector");
 for (const gamePlay of gamePlaySelector) {
-    gamePlay.addEventListener("click", selectingGamePlay);
+	gamePlay.addEventListener("click", selectingGamePlay);
 }
 
 function selectingGamePlay(event) {
-    switch (
-        event.currentTarget.id // currentTarget : élément à partir duquel l'événement à été appelé (gamePlay ici); Target : élément précis qui à déclencher l'événement, donc peut être un enfant de currentTarget
-    ) {
-        case "wallsSelector":
-            borderGameStyle = "walls";
-            canvas.style.border = "3px solid " + COLORS.red;
-            break;
+	switch (
+		event.currentTarget.id // currentTarget : élément à partir duquel l'événement à été appelé (gamePlay ici); Target : élément précis qui à déclencher l'événement, donc peut être un enfant de currentTarget
+	) {
+		case "wallsSelector":
+			borderGameStyle = "walls";
+			canvas.style.border = "3px solid " + COLORS.red;
+			break;
 
-        case "mirrorSelector":
-            borderGameStyle = "mirror";
-            canvas.style.border = "none";
-            break;
+		case "mirrorSelector":
+			borderGameStyle = "mirror";
+			canvas.style.border = "none";
+			break;
 
-        default:
-            throw "Invalid Gameplay";
-    }
-    apple.draw(); // Met à jour le canvas pour afficher le nouveau mode.
+		default:
+			throw "Invalid Gameplay";
+	}
+	apple.draw(); // Met à jour le canvas pour afficher le nouveau mode.
 }
 
 // Gestion du selecteur de style :
 const styleSelector = document.getElementsByClassName("styleSelector");
 for (const style of styleSelector) {
-    style.addEventListener("click", selectingStyle);
+	style.addEventListener("click", selectingStyle);
 }
 
 function selectingStyle(event) {
-    const radius = (cellSize / 2).toString() + "px";
-    switch (event.currentTarget.id) {
-        case "classicSelector":
-            gameStyle = "classic";
-            canvas.style.borderRadius = "0";
-            setting.style.borderRadius = "0";
-            break;
+	const radius = (cellSize / 2).toString() + "px";
+	switch (event.currentTarget.id) {
+		case "classicSelector":
+			gameStyle = "classic";
+			canvas.style.borderRadius = "0";
+			setting.style.borderRadius = "0";
+			break;
 
-        case "fullSelector":
-            gameStyle = "full";
-            canvas.style.borderRadius = "0";
-            setting.style.borderRadius = "0";
-            break;
+		case "fullSelector":
+			gameStyle = "full";
+			canvas.style.borderRadius = "0";
+			setting.style.borderRadius = "0";
+			break;
 
-        case "roundedSelector":
-            gameStyle = "rounded";
-            canvas.style.borderRadius = radius;
-            setting.style.borderRadius = radius;
-            break;
+		case "roundedSelector":
+			gameStyle = "rounded";
+			canvas.style.borderRadius = radius;
+			setting.style.borderRadius = radius;
+			break;
 
-        case "bigHeadSelector":
-            gameStyle = "bigHead";
-            canvas.style.borderRadius = radius;
-            setting.style.borderRadius = radius;
-            break;
+		case "bigHeadSelector":
+			gameStyle = "bigHead";
+			canvas.style.borderRadius = radius;
+			setting.style.borderRadius = radius;
+			break;
 
-        default:
-            throw "Invalid Style";
-    }
+		default:
+			throw "Invalid Style";
+	}
 
-    // Mise à jour du preview du snake avec le nouveau style :
-    getSnakePreview();
+	// Mise à jour du preview du snake avec le nouveau style :
+	getSnakePreview();
 
-    // Met à jour du canvas du jeu pour afficher le nouveau mode :
-    style = new Skins(gameStyle, contexte, cellSize);
-    contexte.clearRect(0, 0, canvas.width, canvas.height);
-    apple.draw();
-    snake.draw(style);
-    drawPause();
+	// Met à jour du canvas du jeu pour afficher le nouveau mode :
+	style = new Skins(gameStyle, contexte, cellSize);
+	contexte.clearRect(0, 0, canvas.width, canvas.height);
+	apple.draw();
+	snake.draw(style);
+	drawPause();
 }
 /*
 
@@ -437,37 +438,37 @@ function selectingStyle(event) {
 // Détecte l'appuis sur les touches :
 
 document.onkeydown = function handleKeyDown(event) {
-    let key = event.key; // renvoi le code de la touche qui a été appuyée
-    let newDirection;
-    switch (key) {
-        case "d": // touche d
-        case "Right": // touche directionnelle droite
-        case "ArrowRight":
-            newDirection = "right";
-            break;
-        case "q": // touche q
-        case "Left": // touche directionnelle gauche
-        case "ArrowLeft":
-            newDirection = "left";
-            break;
-        case "z": // touche z
-        case "Up": // touche directionnelle haut
-        case "ArrowUp":
-            newDirection = "up";
-            break;
-        case "s": // touche s
-        case "Down": // touche directionnelle bas
-        case "ArrowDown":
-            newDirection = "down";
-            break;
-        case "Enter": // touche entrée
-        case " ": // touche espace
-            setting.style.display == "block" || pauseOrReload();
-            break;
-        default:
-            return;
-    }
-    pause || snake.setDirection(newDirection);
+	let key = event.key; // renvoi le code de la touche qui a été appuyée
+	let newDirection;
+	switch (key) {
+		case "d": // touche d
+		case "Right": // touche directionnelle droite
+		case "ArrowRight":
+			newDirection = "right";
+			break;
+		case "q": // touche q
+		case "Left": // touche directionnelle gauche
+		case "ArrowLeft":
+			newDirection = "left";
+			break;
+		case "z": // touche z
+		case "Up": // touche directionnelle haut
+		case "ArrowUp":
+			newDirection = "up";
+			break;
+		case "s": // touche s
+		case "Down": // touche directionnelle bas
+		case "ArrowDown":
+			newDirection = "down";
+			break;
+		case "Enter": // touche entrée
+		case " ": // touche espace
+			setting.style.display == "block" || pauseOrReload();
+			break;
+		default:
+			return;
+	}
+	pause || snake.setDirection(newDirection);
 };
 /*
 
@@ -488,120 +489,120 @@ let waitForMoveDelay = false;
 let killTimeOut = false;
 
 function getNewDirection() {
-    let newDirection;
+	let newDirection;
 
-    if (xMove > 0 && xMove >= Math.abs(yMove)) {
-        newDirection = "right";
-    } else if (yMove > 0 && yMove > Math.abs(xMove)) {
-        newDirection = "down";
-    } else if (xMove < 0 && -xMove >= Math.abs(yMove)) {
-        newDirection = "left";
-    } else {
-        newDirection = "up";
-    }
+	if (xMove > 0 && xMove >= Math.abs(yMove)) {
+		newDirection = "right";
+	} else if (yMove > 0 && yMove > Math.abs(xMove)) {
+		newDirection = "down";
+	} else if (xMove < 0 && -xMove >= Math.abs(yMove)) {
+		newDirection = "left";
+	} else {
+		newDirection = "up";
+	}
 
-    return newDirection;
+	return newDirection;
 }
 
 document.body.addEventListener(
-    "touchstart",
-    function (event) {
-        // Target : document au lieu de canvas pour inclure les éléments d'affichage "pause" & "Game Over"
+	"touchstart",
+	function (event) {
+		// Target : document au lieu de canvas pour inclure les éléments d'affichage "pause" & "Game Over"
 
-        if (
-            event.target == canvas ||
-            event.target == pauseElement ||
-            event.target == gameOverElement ||
-            event.target == footerElement ||
-            event.target == mainElement
-        ) {
-            if (getComputedStyle(setting).display == "none") {
-                //event.preventDefault(); // Bloque l'appel de l'évenement "click" en même temps que le touch, sauf pour fermer les settings.
-                blockClickPropagation = true;
-            }
-            xFirst = event.touches[0].clientX;
-            yFirst = event.touches[0].clientY;
-            timingStart = performance.now();
+		if (
+			event.target == canvas ||
+			event.target == pauseElement ||
+			event.target == gameOverElement ||
+			event.target == footerElement ||
+			event.target == mainElement
+		) {
+			if (getComputedStyle(setting).display == "none") {
+				//event.preventDefault(); // Bloque l'appel de l'évenement "click" en même temps que le touch, sauf pour fermer les settings.
+				blockClickPropagation = true;
+			}
+			xFirst = event.touches[0].clientX;
+			yFirst = event.touches[0].clientY;
+			timingStart = performance.now();
 
-            waitForMoveDelay = false; // Réinitialise si le timeOut est kill
-        }
-    },
-    { passive: false }
+			waitForMoveDelay = false; // Réinitialise si le timeOut est kill
+		}
+	},
+	{ passive: false }
 );
 
 document.body.addEventListener(
-    "touchmove",
-    function (event) {
-        if (
-            (event.target == canvas ||
-                event.target == pauseElement ||
-                event.target == gameOverElement ||
-                event.target == footerElement ||
-                event.target == mainElement) &&
-            event.touches.length == 1 &&
-            !pause
-        ) {
-            event.preventDefault(); // Évite le scroll par défaut pour les gestes tactiles.
-        }
+	"touchmove",
+	function (event) {
+		if (
+			(event.target == canvas ||
+				event.target == pauseElement ||
+				event.target == gameOverElement ||
+				event.target == footerElement ||
+				event.target == mainElement) &&
+			event.touches.length == 1 &&
+			!pause
+		) {
+			event.preventDefault(); // Évite le scroll par défaut pour les gestes tactiles.
+		}
 
-        if (waitForMoveDelay) {
-            return;
-        } // Annule l'event si le delai de rafraîchissement n'est pas atteint.
+		if (waitForMoveDelay) {
+			return;
+		} // Annule l'event si le delai de rafraîchissement n'est pas atteint.
 
-        if (event.target == canvas || event.target == footerElement || event.target == mainElement) {
-            waitForMoveDelay = true;
-            killTimeOut = false;
+		if (event.target == canvas || event.target == footerElement || event.target == mainElement) {
+			waitForMoveDelay = true;
+			killTimeOut = false;
 
-            setTimeout(function () {
-                if (killTimeOut) {
-                    return;
-                } // Annule la programmation si le doigt est levé avant
+			setTimeout(function () {
+				if (killTimeOut) {
+					return;
+				} // Annule la programmation si le doigt est levé avant
 
-                xMove = event.touches[0].clientX - xFirst;
-                yMove = event.touches[0].clientY - yFirst;
-                pause || snake.setDirection(getNewDirection());
+				xMove = event.touches[0].clientX - xFirst;
+				yMove = event.touches[0].clientY - yFirst;
+				pause || snake.setDirection(getNewDirection());
 
-                // La boucle est passée, on peut en relancer une nouvelle
-                xFirst = event.touches[0].clientX;
-                yFirst = event.touches[0].clientY;
-                waitForMoveDelay = false;
-            }, gestureSensitivity); // La sensibilité s'accèlère avec la vitesse de jeu
-        }
-    },
-    { passive: false }
+				// La boucle est passée, on peut en relancer une nouvelle
+				xFirst = event.touches[0].clientX;
+				yFirst = event.touches[0].clientY;
+				waitForMoveDelay = false;
+			}, gestureSensitivity); // La sensibilité s'accèlère avec la vitesse de jeu
+		}
+	},
+	{ passive: false }
 );
 
 document.body.addEventListener(
-    "touchend",
-    function (event) {
-        if (
-            event.target == canvas ||
-            event.target == pauseElement ||
-            event.target == gameOverElement ||
-            event.target == footerElement ||
-            event.target == mainElement
-        ) {
-            timingEnd = performance.now();
-            let touchDelay = timingEnd - timingStart;
+	"touchend",
+	function (event) {
+		if (
+			event.target == canvas ||
+			event.target == pauseElement ||
+			event.target == gameOverElement ||
+			event.target == footerElement ||
+			event.target == mainElement
+		) {
+			timingEnd = performance.now();
+			let touchDelay = timingEnd - timingStart;
 
-            if (waitForMoveDelay) {
-                // Si le doigt est levé avant que le timeOut soit appelé
-                killTimeOut = true; // On anule le timeOut
+			if (waitForMoveDelay) {
+				// Si le doigt est levé avant que le timeOut soit appelé
+				killTimeOut = true; // On anule le timeOut
 
-                // Et on fait le calcul maintenant
-                xMove = event.changedTouches[0].clientX - xFirst;
-                yMove = event.changedTouches[0].clientY - yFirst;
-                pause || snake.setDirection(getNewDirection());
-            }
+				// Et on fait le calcul maintenant
+				xMove = event.changedTouches[0].clientX - xFirst;
+				yMove = event.changedTouches[0].clientY - yFirst;
+				pause || snake.setDirection(getNewDirection());
+			}
 
-            if (Math.abs(xMove) < 9 && Math.abs(yMove) < 9 && touchDelay < 250) {
-                // Math.abs(number) : renvoi toujours un nombre positif, donc Math.abs(number) === Math.abs(-number)
-                pauseOrReload();
-            }
+			if (Math.abs(xMove) < 9 && Math.abs(yMove) < 9 && touchDelay < 250) {
+				// Math.abs(number) : renvoi toujours un nombre positif, donc Math.abs(number) === Math.abs(-number)
+				pauseOrReload();
+			}
 
-            xMove = 0;
-            yMove = 0;
-        }
-    },
-    { passive: false }
+			xMove = 0;
+			yMove = 0;
+		}
+	},
+	{ passive: false }
 );
