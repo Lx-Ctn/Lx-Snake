@@ -6,7 +6,7 @@ import { Skins } from "./app/GameSkins.js";
 /** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
 
 // On tiens compte de la résolution de l'écran pour garder un affichage correct sur retina display : on multiplie la taille du canvas, puis divise en css
-const resolution = window.devicePixelRatio;
+const resolution = window.devicePixelRatio || 1;
 const canvasWidth = resolution * 780;
 const canvasHeight = resolution * 600;
 const cellSize = resolution * 30;
@@ -150,9 +150,10 @@ function drawGameOver(timeStamp) {
 		contexte.fillStyle = COLORS.oldWhite;
 		contexte.font = messagesStyle();
 
-		delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 1.6 * fontSize);
+		delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 0.8 * fontSize * resolution);
 		delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
-		delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 1.3 * fontSize);
+		delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 0.65 * fontSize * resolution);
+
 		contexte.restore();
 
 		delay <= 800 && requestAnimationFrame(drawGameOver);
@@ -299,21 +300,26 @@ const settingIcon = document.getElementById("settingIcon");
 const exitIcon = document.getElementById("exitSetting");
 const setting = document.getElementById("setting");
 /** @type HTMLCanvasElement */ const snakePreviewCanvas = document.querySelector("#snakePreview");
-const PreviewcellSize = 20;
-const snakePreviewLength = 7;
-snakePreviewCanvas.width = (snakePreviewLength + 2) * PreviewcellSize;
-snakePreviewCanvas.height = 3 * PreviewcellSize;
+
+const PREVIEW_CELL_SIZE = 20;
+const SNAKE_PREVIEW_LENGTH = 7;
+const width = (SNAKE_PREVIEW_LENGTH + 2) * PREVIEW_CELL_SIZE;
+const height = 3 * PREVIEW_CELL_SIZE;
+snakePreviewCanvas.width = width * resolution;
+snakePreviewCanvas.height = height * resolution;
+snakePreviewCanvas.style.maxWidth = width + "px";
+
 const snakePreviewCtx = snakePreviewCanvas.getContext("2d");
 let previewStyle;
 const snakePreviewBody = [];
-for (let i = 1; i <= snakePreviewLength; i++) {
+for (let i = 1; i <= SNAKE_PREVIEW_LENGTH; i++) {
 	snakePreviewBody.unshift([i, 1, "right"]);
 }
 const snakePreview = new Snake(snakePreviewBody);
 
 function getSnakePreview() {
 	snakePreviewCtx.clearRect(0, 0, snakePreviewCanvas.width, snakePreviewCanvas.height);
-	previewStyle = new Skins(gameStyle, snakePreviewCtx, PreviewcellSize);
+	previewStyle = new Skins(gameStyle, snakePreviewCtx, PREVIEW_CELL_SIZE * resolution);
 	snakePreview.draw(previewStyle);
 }
 
@@ -389,7 +395,7 @@ for (const style of styleSelector) {
 }
 
 function selectingStyle(event) {
-	const radius = (cellSize / 2).toString() + "px";
+	const radius = (cellSize / 2 / resolution).toString() + "px";
 	switch (event.currentTarget.id) {
 		case "classicSelector":
 			gameStyle = "classic";
