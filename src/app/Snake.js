@@ -134,9 +134,9 @@ export class Snake {
 	}
 
 	// Réinitialise le serpent :
-	rebornWith(snakeStartingBody) {
+	rebornWith(snakeStartBody) {
 		this.life = true;
-		this.body = snakeStartingBody.map(cell => new SnakeCell(cell.coor, cell.direction));
-		this.#nextDirection = snakeStartingBody[0].direction;
+		this.body = snakeStartBody.map(cell => new SnakeCell(cell.coor, cell.direction));
+		this.#nextDirection = snakeStartBody[0].direction;
 	}
 }

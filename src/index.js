@@ -1,5 +1,6 @@
 import "./styles/styles.scss";
 import COLORS, { Color } from "./app/Colors.js";
+import { Apple } from "./app/Apple";
 import { Snake } from "./app/Snake.js";
 import { Skins } from "./app/GameSkins.js";
 
@@ -29,13 +30,13 @@ let style;
 
 let snake;
 let snakeColor = COLORS.green;
-let snakeStartingBody = [
+const snakeStartBody = [
 	{ coor: { x: 5, y: 2 }, direction: "right" },
 	{ coor: { x: 4, y: 2 }, direction: "right" },
 	{ coor: { x: 3, y: 2 }, direction: "right" },
 ];
+const appleStartCoor = { x: 6, y: 8 };
 let apple;
-let appleColor = COLORS.red;
 
 let score = 0;
 const lastBestScore = localStorage.getItem("snakeBestScore");
@@ -76,8 +77,8 @@ function init() {
 	contexte = canvas.getContext("2d");
 
 	style = new Skins(gameStyle, contexte, cellSize);
-	snake = new Snake(snakeStartingBody);
-	apple = new Apple([6, 8]);
+	snake = new Snake(snakeStartBody);
+	apple = new Apple(appleStartCoor);
 
 	getScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
 	letsGo();
@@ -143,7 +144,7 @@ function drawGameOver(timeStamp) {
 
 		style.snakeColor = COLORS.red;
 		snake.draw(style);
-		apple.draw();
+		apple.draw(cellSize, contexte, gameStyle);
 
 		contexte.fillStyle = gray.toHsl();
 		contexte.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -172,14 +173,16 @@ function scoreThatApple() {
 
 	// On génére une nouvelle pomme :
 	do {
-		apple.setNewPosition();
+		const randomX = Math.floor(Math.random() * maxCellsInWidth);
+		const randomY = Math.floor(Math.random() * maxCellsInHeight);
+		apple.setNewPosition({ x: randomX, y: randomY });
 	} while (apple.isOnSnake(snake));
 }
 
 // Remet à 0 le jeu après un game-over :
 function reload() {
 	style.snakeColor = COLORS.green;
-	snake.rebornWith(snakeStartingBody);
+	snake.rebornWith(snakeStartBody);
 
 	score = 0;
 	tryAgain = false;
@@ -201,7 +204,7 @@ function refreshCanvas() {
 		getScore(); // Mise à jour de l'affichage des scores
 
 		contexte.clearRect(0, 0, canvas.width, canvas.height);
-		apple.draw();
+		apple.draw(cellSize, contexte, gameStyle);
 		snake.draw(style);
 
 		if (snake.life) {
@@ -212,49 +215,6 @@ function refreshCanvas() {
 			tryAgain ? reload() : requestAnimationFrame(drawGameOver);
 		}
 	}
-}
-
-// Construit l'objet pomme :
-function Apple(coordonnees) {
-	this.x = coordonnees[0];
-	this.y = coordonnees[1];
-
-	// Dessine une pomme :
-	this.draw = function () {
-		contexte.save(); // enregistre les paramètres actuels du contexte.
-		contexte.fillStyle = appleColor;
-		contexte.beginPath();
-
-		const radius = cellSize / 2;
-		const x = this.x * cellSize;
-		const y = this.y * cellSize;
-
-		gameStyle === "classic"
-			? contexte.rect(x + 3, y + 3, cellSize - 6, cellSize - 6)
-			: gameStyle === "full"
-			? contexte.rect(x, y, cellSize, cellSize)
-			: contexte.arc(x + radius, y + radius, radius, 0, Math.PI * 2, true); // x, y : coordonnées du centre, rayon, angleDépart, angleFin (Math.PI * 2 : cercle complet, Math.PI : demi-cercle), sensAntiHoraire.
-
-		contexte.fill();
-		contexte.restore(); // puis les restore pour éviter de dessiner les nouvelles parties du serpents couleur pomme.
-	};
-
-	// Définie de nouvelle coordonnées aléatoires :
-	this.setNewPosition = function () {
-		this.x = Math.floor(Math.random() * maxCellsInWidth);
-		this.y = Math.floor(Math.random() * maxCellsInHeight);
-	};
-
-	// Vérifie si les coordonnées ne sont pas sur le serpent :
-	this.isOnSnake = function (snakeToCheck) {
-		let isOnSnake = false;
-		for (let i = 0; i < snakeToCheck.body.length; i++) {
-			if (this.x === snakeToCheck.body[i].x && this.y === snakeToCheck.body[i].y) {
-				isOnSnake = true;
-			}
-		}
-		return isOnSnake;
-	};
 }
 
 // Gestion de la mise en pause et relance après un game over :
@@ -380,7 +340,7 @@ function selectingGamePlay(event) {
 		default:
 			throw "Invalid Gameplay";
 	}
-	apple.draw(); // Met à jour le canvas pour afficher le nouveau mode.
+	apple.draw(cellSize, contexte, gameStyle); // Met à jour le canvas pour afficher le nouveau mode.
 }
 
 // Gestion du selecteur de style :
@@ -426,7 +386,7 @@ function selectingStyle(event) {
 	// Met à jour du canvas du jeu pour afficher le nouveau mode :
 	style = new Skins(gameStyle, contexte, cellSize);
 	contexte.clearRect(0, 0, canvas.width, canvas.height);
-	apple.draw();
+	apple.draw(cellSize, contexte, gameStyle);
 	snake.draw(style);
 	drawPause();
 }
