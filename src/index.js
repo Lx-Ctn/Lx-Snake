@@ -2,7 +2,7 @@ import "./styles/styles.scss";
 import COLORS, { Color } from "./app/Colors.js";
 import { Apple } from "./app/Apple";
 import { Snake } from "./app/Snake.js";
-import { Skins } from "./app/GameSkins.js";
+import { GameArt } from "./app/game-art/GameArt.js";
 
 /** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
 
@@ -76,7 +76,7 @@ function init() {
 	borderGameStyle = "mirror";
 	contexte = canvas.getContext("2d");
 
-	style = new Skins(gameStyle, contexte, cellSize);
+	style = new GameArt(gameStyle, contexte, cellSize);
 	snake = new Snake(snakeStartBody);
 	apple = new Apple(appleStartCoor);
 
@@ -280,7 +280,7 @@ const snakePreview = new Snake(snakePreviewBody);
 
 function getSnakePreview() {
 	snakePreviewCtx.clearRect(0, 0, snakePreviewCanvas.width, snakePreviewCanvas.height);
-	previewStyle = new Skins(gameStyle, snakePreviewCtx, PREVIEW_CELL_SIZE * resolution);
+	previewStyle = new GameArt(gameStyle, snakePreviewCtx, PREVIEW_CELL_SIZE * resolution);
 	snakePreview.draw(previewStyle);
 }
 
@@ -384,7 +384,7 @@ function selectingStyle(event) {
 	getSnakePreview();
 
 	// Met à jour du canvas du jeu pour afficher le nouveau mode :
-	style = new Skins(gameStyle, contexte, cellSize);
+	style = new GameArt(gameStyle, contexte, cellSize);
 	contexte.clearRect(0, 0, canvas.width, canvas.height);
 	apple.draw(cellSize, contexte, gameStyle);
 	snake.draw(style);
