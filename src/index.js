@@ -25,7 +25,7 @@ let gameLoopDelay = INITIAL_SPEED; // Time between frames : shorter increase gam
 const minGameLoopDelay = 40;
 
 let borderGameStyle;
-let gameStyle = "classic";
+let gameStyle = "evil";
 let style;
 
 let snake;
@@ -376,8 +376,12 @@ function selectingStyle(event) {
 			setting.style.borderRadius = radius;
 			break;
 
+		case "evilSelector":
 		default:
-			throw "Invalid Style";
+			gameStyle = "evil";
+			canvas.style.borderRadius = radius;
+			setting.style.borderRadius = radius;
+			break;
 	}
 
 	// Mise à jour du preview du snake avec le nouveau style :

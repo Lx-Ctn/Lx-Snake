@@ -63,20 +63,12 @@ export function GameArt(gameStyle, contexte, cellSize) {
 
 	const getCoor = () => ({ x: this.x, y: this.y });
 	switch (gameStyle) {
-		case "bigHead":
-			const bigHeadSnakeArt = evil(contexte, cellSize).snake;
-			this.head = () => bigHeadSnakeArt.head(getCoor());
-			this.body = () => bigHeadSnakeArt.body(getCoor());
-			this.turn = turn => bigHeadSnakeArt.turn(getCoor(), turn);
-			this.tail = () => bigHeadSnakeArt.tail(getCoor());
-			break;
-
-		case "rounded":
-			const roundedSnakeArt = rounded(contexte, cellSize).snake;
-			this.head = () => roundedSnakeArt.head(getCoor());
-			this.body = () => roundedSnakeArt.body(getCoor());
-			this.turn = turn => roundedSnakeArt.turn(getCoor(), turn);
-			this.tail = () => roundedSnakeArt.tail(getCoor());
+		case "classic":
+			const classicSnakeArt = classic(contexte, cellSize).snake;
+			this.head = () => classicSnakeArt.head(getCoor());
+			this.body = () => classicSnakeArt.body(getCoor());
+			this.turn = turn => classicSnakeArt.turn(getCoor(), turn);
+			this.tail = () => classicSnakeArt.tail(getCoor());
 			break;
 
 		case "full":
@@ -87,13 +79,29 @@ export function GameArt(gameStyle, contexte, cellSize) {
 			this.tail = () => fullSnakeArt.tail(getCoor());
 			break;
 
-		case "classic":
+		case "rounded":
+			const roundedSnakeArt = rounded(contexte, cellSize).snake;
+			this.head = () => roundedSnakeArt.head(getCoor());
+			this.body = () => roundedSnakeArt.body(getCoor());
+			this.turn = turn => roundedSnakeArt.turn(getCoor(), turn);
+			this.tail = () => roundedSnakeArt.tail(getCoor());
+			break;
+
+		case "bigHead":
+			const bigHeadSnakeArt = bigHead(contexte, cellSize).snake;
+			this.head = () => bigHeadSnakeArt.head(getCoor());
+			this.body = () => bigHeadSnakeArt.body(getCoor());
+			this.turn = turn => bigHeadSnakeArt.turn(getCoor(), turn);
+			this.tail = () => bigHeadSnakeArt.tail(getCoor());
+			break;
+
+		case "evil":
 		default:
-			const classicSnakeArt = classic(contexte, cellSize).snake;
-			this.head = () => classicSnakeArt.head(getCoor());
-			this.body = () => classicSnakeArt.body(getCoor());
-			this.turn = turn => classicSnakeArt.turn(getCoor(), turn);
-			this.tail = () => classicSnakeArt.tail(getCoor());
+			const evilSnakeArt = evil(contexte, cellSize).snake;
+			this.head = () => evilSnakeArt.head(getCoor());
+			this.body = () => evilSnakeArt.body(getCoor());
+			this.turn = turn => evilSnakeArt.turn(getCoor(), turn);
+			this.tail = () => evilSnakeArt.tail(getCoor());
 			break;
 	}
 
