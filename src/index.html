@@ -44,15 +44,21 @@
 				<form>
 					<fieldset>
 						<legend>Gameplay :</legend>
-						<label class="gamePlaySelector" id="mirrorSelector"
-							>Mode miroir :
-							<span class="settingDescriptions">Classique 3310 style.</span>
+
+						<label class="gamePlaySelector" id="mirrorSelector">
+							<dl>
+								<dt>Mode miroir :</dt>
+								<dd class="settingDescriptions">Classique 3310 style.</dd>
+							</dl>
 							<input type="radio" id="mirror" value="mirror" name="gamePlay" checked />
 							<span class="checkmark"></span>
 						</label>
-						<label class="gamePlaySelector" id="wallsSelector"
-							>Mode murs :
-							<span class="settingDescriptions">Les bords sont mortels.</span>
+
+						<label class="gamePlaySelector" id="wallsSelector">
+							<dl>
+								<dt>Mode murs :</dt>
+								<dd class="settingDescriptions">Les bords sont mortels.</dd>
+							</dl>
 							<input type="radio" id="walls" value="walls" name="gamePlay" />
 							<span class="checkmark"></span>
 						</label>
@@ -63,33 +69,48 @@
 							Style :
 							<canvas id="snakePreview"></canvas>
 						</legend>
-						<label class="styleSelector" id="classicSelector"
-							>Classique :
-							<span class="settingDescriptions">Style par défaut, ou plutôt absence de style...</span>
+
+						<label class="styleSelector" id="classicSelector">
+							<dl>
+								<dt>Classique :</dt>
+								<dd class="settingDescriptions">Style par défaut, ou plutôt absence de style...</dd>
+							</dl>
 							<input type="radio" id="classic" value="classic" name="style" />
 							<span class="checkmark"></span>
 						</label>
-						<label class="styleSelector" id="fullSelector"
-							>Plein :
-							<span class="settingDescriptions">On attache les morceaux.</span>
+
+						<label class="styleSelector" id="fullSelector">
+							<dl>
+								<dt>Plein :</dt>
+								<dd class="settingDescriptions">On attache les morceaux.</dd>
+							</dl>
 							<input type="radio" id="full" value="full" name="style" />
 							<span class="checkmark"></span>
 						</label>
-						<label class="styleSelector" id="roundedSelector"
-							>Arrondis :
-							<span class="settingDescriptions">On commence à voir quelque chose d'organique.</span>
+
+						<label class="styleSelector" id="roundedSelector">
+							<dl>
+								<dt>Arrondis :</dt>
+								<dd class="settingDescriptions">On commence à voir quelque chose d'organique.</dd>
+							</dl>
 							<input type="radio" id="rounded" value="rounded" name="style" />
 							<span class="checkmark"></span>
 						</label>
-						<label class="styleSelector" id="bigHeadSelector"
-							>Grosse tête :
-							<span class="settingDescriptions">Mais c'est un serpent !</span>
+
+						<label class="styleSelector" id="bigHeadSelector">
+							<dl>
+								<dt>Grosse tête :</dt>
+								<dd class="settingDescriptions">Mais c'est un serpent !</dd>
+							</dl>
 							<input type="radio" id="bigHead" value="bigHead" name="style" />
 							<span class="checkmark"></span>
 						</label>
-						<label class="styleSelector" id="evilSelector"
-							>Démoniaque :
-							<span class="settingDescriptions">Cours petite pomme ! Cours !</span>
+
+						<label class="styleSelector" id="evilSelector">
+							<dl>
+								<dt>Démoniaque :</dt>
+								<dd class="settingDescriptions">Cours petite pomme ! Cours !</dd>
+							</dl>
 							<input type="radio" id="evil" value="evil" name="style" checked />
 							<span class="checkmark"></span>
 						</label>
