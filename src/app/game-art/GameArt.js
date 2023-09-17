@@ -1,54 +1,66 @@
 import COLORS from "../Colors.js";
 import { ARTS } from "./arts";
 
+const snakeColor = COLORS.green;
+const appleColor = COLORS.red;
+
 export class GameArt {
-	constructor(selectedGameArt, context, cellSize) {
-		this.selectedGameArt = ARTS[selectedGameArt];
+	constructor(gameArtName, context, cellSize) {
 		this.context = context;
-		this.x = null;
-		this.y = null;
 		this.cellSize = cellSize;
+		this.color = snakeColor;
 
-		this.snakeColor = COLORS.green;
-		const appleColor = COLORS.red;
+		const selectedGameArt = ARTS[gameArtName];
+		const gameArt = selectedGameArt(context, cellSize);
 
-		const drawCell = (snakeCell, drawPosition, turn) => {
-			this.coor = snakeCell;
-			this.beginDraw(snakeCell.direction);
-			drawPosition(this.coor, turn);
+		this.snakeArt = gameArt.snake;
+		this.appleArt = gameArt.apple;
+	}
+
+	set snakeArt(snakeArt) {
+		const drawSnakeCell = (snakeCell, drawPosition, turn) => {
+			const coor = { x: snakeCell.x * this.cellSize, y: snakeCell.y * this.cellSize };
+			this.beginDraw(coor, snakeCell.direction);
+			drawPosition(coor, turn);
 			this.closeDraw();
 		};
-
-		const snakeArt = this.selectedGameArt(context, cellSize).snake;
-		this.drawHead = snakeCell => drawCell(snakeCell, snakeArt.head);
-		this.drawBody = snakeCell => drawCell(snakeCell, snakeArt.body);
-		this.drawTurn = (snakeCell, turn) => drawCell(snakeCell, snakeArt.turn, turn);
-		this.drawTail = snakeCell => drawCell(snakeCell, snakeArt.tail);
+		this.drawSnake = {
+			head: snakeCell => drawSnakeCell(snakeCell, snakeArt.head),
+			body: snakeCell => drawSnakeCell(snakeCell, snakeArt.body),
+			turn: (snakeCell, turn) => drawSnakeCell(snakeCell, snakeArt.turn, turn),
+			tail: snakeCell => drawSnakeCell(snakeCell, snakeArt.tail),
+		};
 	}
 
-	set coor(coor) {
-		this.x = coor.x * this.cellSize;
-		this.y = coor.y * this.cellSize;
-	}
-	get coor() {
-		return { x: this.x, y: this.y };
+	set appleArt(appleArt) {
+		this.drawApple = appleCoor => {
+			const coor = { x: appleCoor.x * this.cellSize, y: appleCoor.y * this.cellSize };
+			this.color = appleColor;
+			this.beginDraw(coor);
+			appleArt(coor);
+			this.closeDraw();
+			this.color = snakeColor;
+		};
 	}
 
 	// Initialise le dessin en fonction de la direction de la cellule :
-	beginDraw = function (direction) {
+	beginDraw(coor, direction) {
 		const radius = this.cellSize / 2;
 		this.context.save();
-		this.context.fillStyle = this.snakeColor;
+		this.context.fillStyle = this.color;
 		this.context.beginPath();
-		this.context.translate(this.x + radius, this.y + radius); // On déplace le canvas au niveau de notre centre de rotation
-		this.context.rotate(getRotationAngle[direction]);
-		this.context.translate(-this.x - radius, -this.y - radius); // On remet le canvas en place
-	};
 
-	closeDraw = function () {
+		if (direction) {
+			this.context.translate(coor.x + radius, coor.y + radius); // On déplace le canvas au niveau de notre centre de rotation
+			this.context.rotate(getRotationAngle[direction]);
+			this.context.translate(-coor.x - radius, -coor.y - radius); // On remet le canvas en place
+		}
+	}
+
+	closeDraw() {
 		this.context.fill();
 		this.context.restore();
-	};
+	}
 }
 
 const getRotationAngle = {

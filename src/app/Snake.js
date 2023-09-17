@@ -26,14 +26,14 @@ export class Snake {
 	draw(gameArt) {
 		// La queue récupére la direction de la cellule précédente pour anticiper les tournants :
 		this.tail.direction = this.body[this.body.length - 2].direction;
-		gameArt.drawTail(this.tail);
+		gameArt.drawSnake.tail(this.tail);
 
 		for (let i = this.body.length - 2; i > 0; i--) {
 			const cellDirection = this.body[i].direction;
 			const nextCellDirection = this.body[i - 1].direction;
 
 			if (nextCellDirection === cellDirection) {
-				gameArt.drawBody(this.body[i]);
+				gameArt.drawSnake.body(this.body[i]);
 			} else {
 				let drawDirection;
 				switch (cellDirection) {
@@ -53,11 +53,11 @@ export class Snake {
 					default:
 						throw "Invalid direction";
 				}
-				gameArt.drawTurn(this.body[i], drawDirection);
+				gameArt.drawSnake.turn(this.body[i], drawDirection);
 			}
 		}
 
-		gameArt.drawHead(this.head); // La tête est affichée en dernière pour apparaître au dessus en cas de collision
+		gameArt.drawSnake.head(this.head); // La tête est affichée en dernière pour apparaître au dessus en cas de collision
 	}
 
 	// Fait avancer le serpent selon la direction :
@@ -129,7 +129,7 @@ export class Snake {
 
 	// Détecte la collision avec une pomme :
 	ate(apple) {
-		if (this.head.x === apple.x && this.head.y === apple.y) {
+		if (this.head.x === apple.coor.x && this.head.y === apple.coor.y) {
 			this.#appleEaten = true;
 			return true;
 		}

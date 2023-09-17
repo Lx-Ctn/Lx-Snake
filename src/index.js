@@ -130,7 +130,7 @@ function isCollisions() {
 
 function gameOver() {
 	snake.life = false;
-	style.snakeColor = COLORS.red;
+	style.color = COLORS.red;
 }
 
 let startGameOverAnimation;
@@ -145,9 +145,9 @@ function drawGameOver(timeStamp) {
 		contexte.save();
 		contexte.beginPath();
 
-		style.snakeColor = COLORS.red;
+		style.color = COLORS.red;
 		snake.draw(style);
-		apple.draw(cellSize, contexte, gameStyle);
+		apple.draw(style);
 
 		contexte.fillStyle = gray.toHsl();
 		contexte.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -184,7 +184,7 @@ function scoreThatApple() {
 
 // Remet à 0 le jeu après un game-over :
 function reload() {
-	style.snakeColor = COLORS.green;
+	style.color = COLORS.green;
 	snake.rebornWith(snakeStartBody);
 
 	score = 0;
@@ -206,7 +206,7 @@ function refreshCanvas() {
 		getScore(); // Mise à jour de l'affichage des scores
 
 		contexte.clearRect(0, 0, canvas.width, canvas.height);
-		apple.draw(cellSize, contexte, gameStyle);
+		apple.draw(style);
 		snake.draw(style);
 
 		if (snake.life) {
@@ -342,7 +342,7 @@ function selectingGamePlay(event) {
 		default:
 			throw "Invalid Gameplay";
 	}
-	apple.draw(cellSize, contexte, gameStyle); // Met à jour le canvas pour afficher le nouveau mode.
+	apple.draw(style); // Met à jour le canvas pour afficher le nouveau mode.
 }
 
 // Gestion du selecteur de style :
@@ -392,7 +392,7 @@ function selectingStyle(event) {
 	// Met à jour du canvas du jeu pour afficher le nouveau mode :
 	style = new GameArt(gameStyle, contexte, cellSize);
 	contexte.clearRect(0, 0, canvas.width, canvas.height);
-	apple.draw(cellSize, contexte, gameStyle);
+	apple.draw(style);
 	snake.draw(style);
 	drawPause();
 }
