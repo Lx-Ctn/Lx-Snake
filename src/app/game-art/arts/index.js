@@ -1,5 +1,7 @@
-export { classic } from "./classic";
-export { full } from "./full";
-export { rounded } from "./rounded";
-export { bigHead } from "./bigHead";
-export { evil } from "./evil";
+import { classic } from "./classic";
+import { full } from "./full";
+import { rounded } from "./rounded";
+import { bigHead } from "./bigHead";
+import { evil } from "./evil";
+
+export const ARTS = { classic, full, rounded, bigHead, evil };

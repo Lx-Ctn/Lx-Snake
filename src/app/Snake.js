@@ -23,40 +23,41 @@ export class Snake {
 	}
 
 	// Dessine le serpent :
-	draw(style) {
+	draw(gameArt) {
 		// La queue récupére la direction de la cellule précédente pour anticiper les tournants :
 		this.tail.direction = this.body[this.body.length - 2].direction;
-		this.tail.draw(style, "tail");
+		gameArt.drawTail(this.tail);
 
 		for (let i = this.body.length - 2; i > 0; i--) {
 			const cellDirection = this.body[i].direction;
 			const nextCellDirection = this.body[i - 1].direction;
-			let position = "";
 
 			if (nextCellDirection === cellDirection) {
-				position = "body";
+				gameArt.drawBody(this.body[i]);
 			} else {
+				let drawDirection;
 				switch (cellDirection) {
 					case "up":
-						position = nextCellDirection === "right" ? "turnRight" : "turnLeft"; // nextCellDirection ne peut être "up" puisque nextCellDirection !== direction, ni "down" puique contraint par setDirection()
+						// nextCellDirection ne peut être "up" puisque nextCellDirection !== direction, ni "down" puique contraint par setDirection() :
+						drawDirection = nextCellDirection === "right" ? "right" : "left";
 						break;
 					case "right":
-						position = nextCellDirection === "down" ? "turnRight" : "turnLeft";
+						drawDirection = nextCellDirection === "down" ? "right" : "left";
 						break;
 					case "down":
-						position = nextCellDirection === "left" ? "turnRight" : "turnLeft";
+						drawDirection = nextCellDirection === "left" ? "right" : "left";
 						break;
 					case "left":
-						position = nextCellDirection === "up" ? "turnRight" : "turnLeft";
+						drawDirection = nextCellDirection === "up" ? "right" : "left";
 						break;
 					default:
 						throw "Invalid direction";
 				}
+				gameArt.drawTurn(this.body[i], drawDirection);
 			}
-			this.body[i].draw(style, position);
 		}
 
-		this.head.draw(style, "head"); // La tête est affichée en dernière pour apparaître au dessus en cas de collision
+		gameArt.drawHead(this.head); // La tête est affichée en dernière pour apparaître au dessus en cas de collision
 	}
 
 	// Fait avancer le serpent selon la direction :
