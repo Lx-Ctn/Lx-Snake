@@ -52,6 +52,8 @@ const messagesStyle = ({ fontSize } = { fontSize: defaultFontSize }) =>
 // - Un menu de choix de style, avec choix des couleurs, et une grilles avec l'ensemble des styles déblocables + aperçu
 // - Gameplay + développé avec avancée et évolution, recompense
 
+// TODO: apple drawn after game over
+
 init();
 
 function init() {
@@ -103,13 +105,14 @@ function isCollisions() {
 
 	switch (borderGameStyle) {
 		case "walls":
-			const nextHeadPosition = snake.advance("test");
+			// test: recupère le mouvement suivant avant son affichage pour vérifier une éventuelle collision
+			const nextHeadPosition = snake.advance({ test: true });
 			borderCollision =
 				nextHeadPosition.x < 0 ||
 				nextHeadPosition.x > maxCellsInWidth - 1 ||
 				nextHeadPosition.y < 0 ||
 				nextHeadPosition.y > maxCellsInHeight - 1;
-			if (!borderCollision) snake.advance();
+			if (!borderCollision) snake.advance({ nextCell: nextHeadPosition });
 			break;
 		case "mirror":
 			snake.advance();
@@ -122,7 +125,7 @@ function isCollisions() {
 			throw "Invalid Gameplay";
 	}
 
-	return borderCollision || snake.isAutoCollision(); // + Autocollision
+	return borderCollision || snake.isAutoCollision();
 }
 
 function gameOver() {
@@ -197,7 +200,6 @@ function refreshCanvas() {
 		snake.waitForRefresh = false;
 
 		//snake.advance();
-
 		isCollisions() && gameOver(); // Game-over en cas de collision.
 
 		snake.ate(apple) && scoreThatApple(); // Si le serpent mange une pomme.

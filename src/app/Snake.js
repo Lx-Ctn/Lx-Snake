@@ -60,30 +60,33 @@ export class Snake {
 	}
 
 	// Fait avancer le serpent selon la direction :
-	advance(test = "") {
-		let nextCell = new SnakeCell({ x: this.head.x, y: this.head.y }, this.head.direction);
-		switch (this.#nextDirection) {
-			case "right":
-				nextCell.x += 1;
-				nextCell.direction = "right";
-				break;
-			case "left":
-				nextCell.x -= 1;
-				nextCell.direction = "left";
-				break;
-			case "up":
-				nextCell.y -= 1;
-				nextCell.direction = "up";
-				break;
-			case "down":
-				nextCell.y += 1;
-				nextCell.direction = "down";
-				break;
-			default:
-				throw "Invalid direction";
+	advance({ test = false, nextCell } = { test: false, nextCell: null }) {
+		if (!nextCell) {
+			nextCell = new SnakeCell({ x: this.head.x, y: this.head.y }, this.head.direction);
+			switch (this.#nextDirection) {
+				case "right":
+					nextCell.x += 1;
+					nextCell.direction = "right";
+					break;
+				case "left":
+					nextCell.x -= 1;
+					nextCell.direction = "left";
+					break;
+				case "up":
+					nextCell.y -= 1;
+					nextCell.direction = "up";
+					break;
+				case "down":
+					nextCell.y += 1;
+					nextCell.direction = "down";
+					break;
+				default:
+					throw "Invalid direction";
+			}
 		}
 
-		if (test === "test") {
+		if (test) {
+			// test: recupère le mouvement suivant avant son affichage pour vérifier une éventuelle collision
 			return nextCell;
 		} else {
 			this.body.unshift(nextCell);
