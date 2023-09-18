@@ -52,6 +52,7 @@ module.exports = {
 	plugins: [
 		new HtmlWebpackPlugin({
 			template: path.join(__dirname, "./src/index.html"),
+			favicon: path.join(__dirname, "./src/assets/lx-snake-icon.png"),
 		}),
 	],
 	stats: "minimal",
