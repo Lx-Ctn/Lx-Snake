@@ -3,48 +3,26 @@ import COLORS, { Color } from "./app/Colors.js";
 import { Apple } from "./app/Apple";
 import { Snake } from "./app/Snake.js";
 import { GameArt } from "./app/game-art/GameArt.js";
+import { gameSetting } from "./app/gameSetting";
 
 /** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
-
-// On tiens compte de la résolution de l'écran pour garder un affichage correct sur retina display : on multiplie la taille du canvas, puis divise en css
-const resolution = window.devicePixelRatio || 1;
-const canvasWidth = resolution * 780;
-const canvasHeight = resolution * 600;
-const cellSize = resolution * 30;
-const maxCellsInWidth = canvasWidth / cellSize;
-const maxCellsInHeight = canvasHeight / cellSize;
-
 const footerElement = document.getElementById("footer");
 const mainElement = document.getElementById("main");
 
-let contexte;
+let context;
 let pause;
 let tryAgain = false;
-const INITIAL_SPEED = 140;
-let gameLoopDelay = INITIAL_SPEED; // Time between frames : shorter increase game speed;
-const minGameLoopDelay = 40;
+let gameLoopDelay = gameSetting.initialSpeed; // Time between frames : shorter increase game speed;
 
-let borderGameStyle;
-let gameStyle = "evil";
-let style;
+let gameArt;
 
 let snake;
-let snakeColor = COLORS.green;
-const snakeStartBody = [
-	{ coor: { x: 5, y: 2 }, direction: "right" },
-	{ coor: { x: 4, y: 2 }, direction: "right" },
-	{ coor: { x: 3, y: 2 }, direction: "right" },
-];
-const appleStartCoor = { x: 6, y: 8 };
+const snakeColor = COLORS.green;
 let apple;
 
 let score = 0;
 const lastBestScore = localStorage.getItem("snakeBestScore");
 let bestScore = lastBestScore ? +lastBestScore : 0;
-
-const defaultFontSize = 50;
-const getFontStyle = ({ fontSize } = { fontSize: defaultFontSize }) =>
-	`bold ${resolution * fontSize}px "Courier New", Courier, monospace`;
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - ajouter un vrai menu différentes catégories ?
@@ -54,20 +32,24 @@ const getFontStyle = ({ fontSize } = { fontSize: defaultFontSize }) =>
 
 // TODO: apple drawn after game over
 
+const canvasSetting = gameSetting.canvas;
+
 init();
 
 function init() {
-	canvas.width = canvasWidth;
-	canvas.height = canvasHeight;
-	const ratio = canvasWidth / canvasHeight;
+	canvas.width = canvasSetting.width;
+	canvas.height = canvasSetting.height;
+	const ratio = canvasSetting.width / canvasSetting.height;
 	let headerHeight = "130px";
 	const bottomMargin = "0.8em";
 
 	function setCanvasSize() {
 		headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
-		canvas.style.maxWidth = `min(${canvasWidth / resolution}px, calc((100dvh - ${headerHeight}) * ${ratio}))`;
+		canvas.style.maxWidth = `min(${
+			canvasSetting.width / gameSetting.resolution
+		}px, calc((100dvh - ${headerHeight}) * ${ratio}))`;
 		canvas.style.maxHeight = `min(${
-			canvasHeight / resolution
+			canvasSetting.height / gameSetting.resolution
 		}px, calc(100dvh - ${headerHeight} - ${bottomMargin}))`;
 		// On high pixel density screen, if the height is not round, it could lead to differences between the render of the canvas and the canvas element itself
 		// a fine line appear at the bottom, and we don't want that
@@ -77,27 +59,26 @@ function init() {
 	window.addEventListener("resize", setCanvasSize);
 
 	pause = false;
-	borderGameStyle = "mirror";
-	contexte = canvas.getContext("2d");
+	context = canvas.getContext("2d");
 
-	style = new GameArt(gameStyle, contexte, cellSize);
-	snake = new Snake(snakeStartBody);
-	apple = new Apple(appleStartCoor);
+	gameArt = new GameArt(gameSetting.selectedGameArt, context, canvasSetting.cellSize);
+	snake = new Snake(gameSetting.initialSnakeBody);
+	apple = new Apple(gameSetting.initialAppleCoor);
 
 	getScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
-	letsGo();
+	drawLetsGo();
 	setTimeout(requestAnimationFrame, 1000, refreshCanvas);
 }
 
 // Affichage d'un texte d'intro :
-function letsGo() {
-	contexte.clearRect(0, 0, canvas.width, canvas.height);
-	contexte.fillStyle = snakeColor;
-	contexte.font = getFontStyle();
-	contexte.textBaseline = "middle";
-	contexte.textAlign = "center";
+function drawLetsGo() {
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	context.fillStyle = snakeColor;
+	context.font = canvasSetting.getFontStyle();
+	context.textBaseline = "middle";
+	context.textAlign = "center";
 
-	contexte.fillText("Let's go !", canvasWidth / 2, canvasHeight / 2);
+	context.fillText("Let's go !", canvasSetting.width / 2, canvasSetting.height / 2);
 }
 
 // Contrôle les collisions :
@@ -105,26 +86,27 @@ function isCollisions() {
 	// Détecte les collisions aux bords :
 	let borderCollision = false;
 
-	switch (borderGameStyle) {
-		case "walls":
+	switch (gameSetting.selectedGamePlay) {
+		case "walls": {
 			// test: recupère le mouvement suivant avant son affichage pour vérifier une éventuelle collision
 			const nextHeadPosition = snake.advance({ test: true });
 			borderCollision =
 				nextHeadPosition.x < 0 ||
-				nextHeadPosition.x > maxCellsInWidth - 1 ||
+				nextHeadPosition.x > canvasSetting.maxCellsInWidth - 1 ||
 				nextHeadPosition.y < 0 ||
-				nextHeadPosition.y > maxCellsInHeight - 1;
+				nextHeadPosition.y > canvasSetting.maxCellsInHeight - 1;
 			if (!borderCollision) snake.advance({ nextCell: nextHeadPosition });
 			break;
+		}
 		case "mirror":
 			snake.advance();
-			if (snake.head.x < 0) snake.head.x = maxCellsInWidth - 1;
-			if (snake.head.x > maxCellsInWidth - 1) snake.head.x = 0;
-			if (snake.head.y < 0) snake.head.y = maxCellsInHeight - 1;
-			if (snake.head.y > maxCellsInHeight - 1) snake.head.y = 0;
+			if (snake.head.x < 0) snake.head.x = canvasSetting.maxCellsInWidth - 1;
+			if (snake.head.x > canvasSetting.maxCellsInWidth - 1) snake.head.x = 0;
+			if (snake.head.y < 0) snake.head.y = canvasSetting.maxCellsInHeight - 1;
+			if (snake.head.y > canvasSetting.maxCellsInHeight - 1) snake.head.y = 0;
 			break;
 		default:
-			throw "Invalid Gameplay";
+			throw new Error("Invalid Gameplay");
 	}
 
 	return borderCollision || snake.isAutoCollision();
@@ -132,7 +114,7 @@ function isCollisions() {
 
 function gameOver() {
 	snake.life = false;
-	style.color = COLORS.red;
+	gameArt.color = COLORS.red;
 }
 
 let startGameOverAnimation;
@@ -144,25 +126,27 @@ function drawGameOver(timeStamp) {
 		const delay = timeStamp - startGameOverAnimation;
 		if (gray.alpha < 70) gray.alpha = delay / 15;
 
-		contexte.save();
-		contexte.beginPath();
+		const { width, height } = canvasSetting;
 
-		style.color = COLORS.red;
-		snake.draw(style);
-		apple.draw(style);
+		context.save();
+		context.beginPath();
 
-		contexte.fillStyle = gray.toHsl();
-		contexte.fillRect(0, 0, canvasWidth, canvasHeight);
+		gameArt.color = COLORS.red;
+		snake.draw(gameArt);
+		apple.draw(gameArt);
+
+		context.fillStyle = gray.toHsl();
+		context.fillRect(0, 0, width, height);
 
 		const fontSize = 80;
-		contexte.fillStyle = COLORS.oldWhite;
-		contexte.font = getFontStyle({ fontSize });
+		context.fillStyle = COLORS.oldWhite;
+		context.font = canvasSetting.getFontStyle({ fontSize });
 
-		delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 0.8 * fontSize * resolution);
-		delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
-		delay >= 700 && contexte.fillText("OVER", canvasWidth / 2, canvasHeight / 2 + 0.65 * fontSize * resolution);
+		delay >= 200 && context.fillText("> <", width / 2, height / 2 - 0.8 * fontSize * gameSetting.resolution);
+		delay >= 500 && context.fillText("GAME", width / 2, height / 2);
+		delay >= 700 && context.fillText("OVER", width / 2, height / 2 + 0.65 * fontSize * gameSetting.resolution);
 
-		contexte.restore();
+		context.restore();
 
 		delay <= 800 && requestAnimationFrame(drawGameOver);
 	}
@@ -174,24 +158,27 @@ function scoreThatApple() {
 	if (score > bestScore) {
 		bestScore = score;
 	}
-	gameLoopDelay > minGameLoopDelay ? (gameLoopDelay -= 3) : (gameLoopDelay = minGameLoopDelay); // On accellère le jeu
+	const minGameLoopDelay = gameSetting.maxSpeed;
+	gameLoopDelay > minGameLoopDelay
+		? (gameLoopDelay -= gameSetting.acceleration)
+		: (gameLoopDelay = minGameLoopDelay); // Speed-up the game
 
 	// On génére une nouvelle pomme :
 	do {
-		const randomX = Math.floor(Math.random() * maxCellsInWidth);
-		const randomY = Math.floor(Math.random() * maxCellsInHeight);
+		const randomX = Math.floor(Math.random() * canvasSetting.maxCellsInWidth);
+		const randomY = Math.floor(Math.random() * canvasSetting.maxCellsInHeight);
 		apple.setNewPosition({ x: randomX, y: randomY });
 	} while (apple.isOnSnake(snake));
 }
 
 // Remet à 0 le jeu après un game-over :
 function reload() {
-	style.color = COLORS.green;
-	snake.rebornWith(snakeStartBody);
+	gameArt.color = COLORS.green;
+	snake.rebornWith(gameSetting.initialSnakeBody);
 
 	score = 0;
 	tryAgain = false;
-	gameLoopDelay = INITIAL_SPEED;
+	gameLoopDelay = gameSetting.initialSpeed;
 
 	requestAnimationFrame(refreshCanvas);
 }
@@ -201,15 +188,15 @@ function refreshCanvas() {
 	if (!pause) {
 		snake.waitForRefresh = false;
 
-		//snake.advance();
+		// snake.advance();
 		isCollisions() && gameOver(); // Game-over en cas de collision.
 
 		snake.ate(apple) && scoreThatApple(); // Si le serpent mange une pomme.
 		getScore(); // Mise à jour de l'affichage des scores
 
-		contexte.clearRect(0, 0, canvas.width, canvas.height);
-		apple.draw(style);
-		snake.draw(style);
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		apple.draw(gameArt);
+		snake.draw(gameArt);
 
 		if (snake.life) {
 			setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
@@ -239,14 +226,14 @@ function pauseOrReload() {
 
 // Affichage de la pause :
 function drawPause() {
-	contexte.save();
-	contexte.beginPath();
-	contexte.fillStyle = "#333c";
-	contexte.fillRect(0, 0, canvasWidth, canvasHeight);
-	contexte.fillStyle = COLORS.oldWhite;
-	contexte.font = getFontStyle();
-	contexte.fillText("|| Pause ||", canvasWidth / 2, canvasHeight / 2);
-	contexte.restore();
+	context.save();
+	context.beginPath();
+	context.fillStyle = "#333a";
+	context.fillRect(0, 0, canvasSetting.width, canvasSetting.height);
+	context.fillStyle = COLORS.oldWhite;
+	context.font = canvasSetting.getFontStyle();
+	context.fillText("|| Pause ||", canvasSetting.width / 2, canvasSetting.height / 2);
+	context.restore();
 }
 
 // Met à jour l'affichage des scores :
@@ -266,26 +253,18 @@ const exitIcon = document.getElementById("exitSetting");
 const setting = document.getElementById("setting");
 /** @type HTMLCanvasElement */ const snakePreviewCanvas = document.querySelector("#snakePreview");
 
-const PREVIEW_CELL_SIZE = 20;
-const SNAKE_PREVIEW_LENGTH = 7;
-const width = (SNAKE_PREVIEW_LENGTH + 2) * PREVIEW_CELL_SIZE;
-const height = 3 * PREVIEW_CELL_SIZE;
-snakePreviewCanvas.width = width * resolution;
-snakePreviewCanvas.height = height * resolution;
-snakePreviewCanvas.style.maxWidth = width + "px";
+const previewSetting = gameSetting.preview;
+snakePreviewCanvas.width = previewSetting.width;
+snakePreviewCanvas.height = previewSetting.height;
+snakePreviewCanvas.style.maxWidth = previewSetting.width / gameSetting.resolution + "px";
 
 const snakePreviewCtx = snakePreviewCanvas.getContext("2d");
-let previewStyle;
-const snakePreviewBody = [];
-for (let i = 1; i <= SNAKE_PREVIEW_LENGTH; i++) {
-	snakePreviewBody.unshift({ coor: { x: i, y: 1 }, direction: "right" });
-}
-const snakePreview = new Snake(snakePreviewBody);
+const snakePreview = new Snake(previewSetting.snakePreviewBody);
 
 function getSnakePreview() {
 	snakePreviewCtx.clearRect(0, 0, snakePreviewCanvas.width, snakePreviewCanvas.height);
-	previewStyle = new GameArt(gameStyle, snakePreviewCtx, PREVIEW_CELL_SIZE * resolution);
-	snakePreview.draw(previewStyle);
+	const previewGameArt = new GameArt(gameSetting.selectedGameArt, snakePreviewCtx, previewSetting.cellSize);
+	snakePreview.draw(previewGameArt);
 }
 
 settingIcon.addEventListener("click", getSetting);
@@ -298,7 +277,7 @@ function getSetting(event) {
 		pauseOrReload();
 	}
 	getSnakePreview();
-	setting.style.display = setting.style.display == "block" ? "none" : "block";
+	setting.style.display = setting.style.display === "block" ? "none" : "block";
 }
 
 /*
@@ -316,7 +295,7 @@ document.body.addEventListener("click", function (event) {
 	}
 	if (blockClickPropagation) blockClickPropagation = false;
 
-	if (!setting.contains(event.target) && setting.style.display == "block") {
+	if (!setting.contains(event.target) && setting.style.display === "block") {
 		getSetting(event);
 	}
 });
@@ -332,19 +311,19 @@ function selectingGamePlay(event) {
 		event.currentTarget.id // currentTarget : élément à partir duquel l'événement à été appelé (gamePlay ici); Target : élément précis qui à déclencher l'événement, donc peut être un enfant de currentTarget
 	) {
 		case "wallsSelector":
-			borderGameStyle = "walls";
+			gameSetting.selectedGamePlay = "walls";
 			canvas.style.border = "3px solid " + COLORS.red;
 			break;
 
 		case "mirrorSelector":
-			borderGameStyle = "mirror";
+			gameSetting.selectedGamePlay = "mirror";
 			canvas.style.border = "none";
 			break;
 
 		default:
-			throw "Invalid Gameplay";
+			throw new Error("Invalid Gameplay");
 	}
-	apple.draw(style); // Met à jour le canvas pour afficher le nouveau mode.
+	apple.draw(gameArt); // Met à jour le canvas pour afficher le nouveau mode.
 }
 
 // Gestion du selecteur de style :
@@ -354,35 +333,35 @@ for (const style of styleSelector) {
 }
 
 function selectingStyle(event) {
-	const radius = (cellSize / 2 / resolution).toString() + "px";
+	const radius = `${canvasSetting.cellSize / 2 / gameSetting.resolution}px`;
 	switch (event.currentTarget.id) {
 		case "classicSelector":
-			gameStyle = "classic";
+			gameSetting.selectedGameArt = "classic";
 			canvas.style.borderRadius = "0";
 			setting.style.borderRadius = "0";
 			break;
 
 		case "fullSelector":
-			gameStyle = "full";
+			gameSetting.selectedGameArt = "full";
 			canvas.style.borderRadius = "0";
 			setting.style.borderRadius = "0";
 			break;
 
 		case "roundedSelector":
-			gameStyle = "rounded";
+			gameSetting.selectedGameArt = "rounded";
 			canvas.style.borderRadius = radius;
 			setting.style.borderRadius = radius;
 			break;
 
 		case "bigHeadSelector":
-			gameStyle = "bigHead";
+			gameSetting.selectedGameArt = "bigHead";
 			canvas.style.borderRadius = radius;
 			setting.style.borderRadius = radius;
 			break;
 
 		case "evilSelector":
 		default:
-			gameStyle = "evil";
+			gameSetting.selectedGameArt = "evil";
 			canvas.style.borderRadius = radius;
 			setting.style.borderRadius = radius;
 			break;
@@ -392,10 +371,10 @@ function selectingStyle(event) {
 	getSnakePreview();
 
 	// Met à jour du canvas du jeu pour afficher le nouveau mode :
-	style = new GameArt(gameStyle, contexte, cellSize);
-	contexte.clearRect(0, 0, canvas.width, canvas.height);
-	apple.draw(style);
-	snake.draw(style);
+	gameArt = new GameArt(gameSetting.selectedGameArt, context, canvasSetting.cellSize);
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	apple.draw(gameArt);
+	snake.draw(gameArt);
 	drawPause();
 }
 /*
@@ -407,7 +386,7 @@ function selectingStyle(event) {
 // Détecte l'appuis sur les touches :
 
 document.onkeydown = function handleKeyDown(event) {
-	let key = event.key; // renvoi le code de la touche qui a été appuyée
+	const key = event.key; // renvoi le code de la touche qui a été appuyée
 	let newDirection;
 	switch (key) {
 		case "d": // touche d
@@ -455,7 +434,7 @@ let xMove = 0;
 let yMove = 0;
 let timingStart;
 let timingEnd;
-let gestureSensitivity = gameLoopDelay; // Delais de rafraîchissement du calcul du mouvement au toucher (en ms)
+const gestureSensitivity = gameLoopDelay; // Delais de rafraîchissement du calcul du mouvement au toucher (en ms)
 let waitForMoveDelay = false;
 let killTimeOut = false;
 
@@ -480,9 +459,9 @@ document.body.addEventListener(
 	function (event) {
 		// Target : document au lieu de canvas pour inclure les éléments d'affichage "pause" & "Game Over"
 
-		if (event.target == canvas || event.target == footerElement || event.target == mainElement) {
-			if (getComputedStyle(setting).display == "none") {
-				//event.preventDefault(); // Bloque l'appel de l'évenement "click" en même temps que le touch, sauf pour fermer les settings.
+		if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
+			if (getComputedStyle(setting).display === "none") {
+				// Bloque l'appel de l'évenement "click" en même temps que le touch, sauf pour fermer les settings.
 				blockClickPropagation = true;
 			}
 			xFirst = event.touches[0].clientX;
@@ -500,7 +479,7 @@ document.body.addEventListener(
 	function (event) {
 		if (
 			(event.target === canvas || event.target === footerElement || event.target === mainElement) &&
-			event.touches.length == 1 &&
+			event.touches.length === 1 &&
 			!pause
 		) {
 			event.preventDefault(); // Évite le scroll par défaut pour les gestes tactiles.
@@ -510,7 +489,7 @@ document.body.addEventListener(
 			return;
 		} // Annule l'event si le delai de rafraîchissement n'est pas atteint.
 
-		if (event.target == canvas || event.target == footerElement || event.target == mainElement) {
+		if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
 			waitForMoveDelay = true;
 			killTimeOut = false;
 
@@ -538,7 +517,7 @@ document.body.addEventListener(
 	function (event) {
 		if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
 			timingEnd = performance.now();
-			let touchDelay = timingEnd - timingStart;
+			const touchDelay = timingEnd - timingStart;
 
 			if (waitForMoveDelay) {
 				// Si le doigt est levé avant que le timeOut soit appelé
