@@ -61,12 +61,14 @@ function init() {
 	canvas.height = canvasHeight;
 	const ratio = canvasWidth / canvasHeight;
 	let headerHeight = "130px";
+	const bottomMargin = "0.8em";
 
 	function setCanvasSize() {
 		headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
-		canvas.style.maxWidth =
-			"min(" + canvasWidth / resolution + "px, calc((100dvh - " + headerHeight + ")*" + ratio + "))";
-		canvas.style.maxHeight = "min(" + canvasHeight / resolution + "px, calc(100dvh - " + headerHeight + "))";
+		canvas.style.maxWidth = `min(${canvasWidth / resolution}px, calc((100dvh - ${headerHeight}) * ${ratio}))`;
+		canvas.style.maxHeight = `min(${
+			canvasHeight / resolution
+		}px, calc(100dvh - ${headerHeight} - ${bottomMargin}))`;
 		// On high pixel density screen, if the height is not round, it could lead to differences between the render of the canvas and the canvas element itself
 		// a fine line appear at the bottom, and we don't want that
 		canvas.style.height = `${Math.round(window.innerWidth / ratio)}px`;
