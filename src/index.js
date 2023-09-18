@@ -43,7 +43,7 @@ const lastBestScore = localStorage.getItem("snakeBestScore");
 let bestScore = lastBestScore ? +lastBestScore : 0;
 
 const defaultFontSize = 50;
-const messagesStyle = ({ fontSize } = { fontSize: defaultFontSize }) =>
+const getFontStyle = ({ fontSize } = { fontSize: defaultFontSize }) =>
 	`bold ${resolution * fontSize}px "Courier New", Courier, monospace`;
 
 // Idées à implémenter pour faire évoluer le jeu :
@@ -91,7 +91,7 @@ function init() {
 function letsGo() {
 	contexte.clearRect(0, 0, canvas.width, canvas.height);
 	contexte.fillStyle = snakeColor;
-	contexte.font = messagesStyle();
+	contexte.font = getFontStyle();
 	contexte.textBaseline = "middle";
 	contexte.textAlign = "center";
 
@@ -154,7 +154,7 @@ function drawGameOver(timeStamp) {
 
 		const fontSize = 80;
 		contexte.fillStyle = COLORS.oldWhite;
-		contexte.font = messagesStyle({ fontSize });
+		contexte.font = getFontStyle({ fontSize });
 
 		delay >= 200 && contexte.fillText("> <", canvasWidth / 2, canvasHeight / 2 - 0.8 * fontSize * resolution);
 		delay >= 500 && contexte.fillText("GAME", canvasWidth / 2, canvasHeight / 2);
@@ -242,7 +242,7 @@ function drawPause() {
 	contexte.fillStyle = "#333c";
 	contexte.fillRect(0, 0, canvasWidth, canvasHeight);
 	contexte.fillStyle = COLORS.oldWhite;
-	contexte.font = messagesStyle();
+	contexte.font = getFontStyle();
 	contexte.fillText("|| Pause ||", canvasWidth / 2, canvasHeight / 2);
 	contexte.restore();
 }
@@ -430,11 +430,13 @@ document.onkeydown = function handleKeyDown(event) {
 			break;
 		case "Enter": // touche entrée
 		case " ": // touche espace
-			setting.style.display == "block" || pauseOrReload();
+			event.preventDefault();
+			setting.style.display === "block" || pauseOrReload();
 			break;
 		default:
 			return;
 	}
+	if (newDirection) event.preventDefault();
 	pause || snake.setDirection(newDirection);
 };
 /*
