@@ -1,6 +1,3 @@
-import Colors from "./Colors";
-const appleColor = Colors.red;
-
 // Construit l'objet pomme :
 export class Apple {
 	constructor(coor) {

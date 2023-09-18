@@ -51,7 +51,7 @@ export class Snake {
 						drawDirection = nextCellDirection === "up" ? "right" : "left";
 						break;
 					default:
-						throw "Invalid direction";
+						throw new Error("Invalid direction");
 				}
 				gameArt.drawSnake.turn(this.body[i], drawDirection);
 			}
@@ -82,7 +82,7 @@ export class Snake {
 					nextCell.direction = "down";
 					break;
 				default:
-					throw "Invalid direction";
+					throw new Error("Invalid direction");
 			}
 		}
 
@@ -108,7 +108,7 @@ export class Snake {
 				allowedDirection = ["right", "left"];
 				break;
 			default:
-				throw "Invalid direction";
+				throw new Error("Invalid direction");
 		}
 		if (allowedDirection.includes(newDirection) && !this.waitForRefresh) {
 			this.#nextDirection = newDirection;
@@ -118,7 +118,7 @@ export class Snake {
 
 	// Détecte une collision avec son propre corps :
 	isAutoCollision() {
-		let tail = this.body.slice(1);
+		const tail = this.body.slice(1);
 		for (const cell of tail) {
 			if (this.head.x === cell.x && this.head.y === cell.y) {
 				return true;
