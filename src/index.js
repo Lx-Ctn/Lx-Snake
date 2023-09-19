@@ -1,9 +1,10 @@
 import "./styles/styles.scss";
-import COLORS, { Color } from "./app/Colors.js";
+import COLORS from "./app/Colors.js";
 import { Apple } from "./app/Apple";
 import { Snake } from "./app/Snake.js";
 import { GameArt } from "./app/game-art/GameArt.js";
 import { gameSetting } from "./app/gameSetting";
+import { drawGameState } from "./app/game-art/drawGameState";
 
 /** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
 const footerElement = document.getElementById("footer");
@@ -11,13 +12,11 @@ const mainElement = document.getElementById("main");
 
 let context;
 let pause;
-let tryAgain = false;
 let gameLoopDelay = gameSetting.initialSpeed; // Time between frames : shorter increase game speed;
 
 let gameArt;
 
 let snake;
-const snakeColor = COLORS.green;
 let apple;
 
 let score = 0;
@@ -66,19 +65,8 @@ function init() {
 	apple = new Apple(gameSetting.initialAppleCoor);
 
 	getScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
-	drawLetsGo();
+	drawGameState.letsGo(context);
 	setTimeout(requestAnimationFrame, 1000, refreshCanvas);
-}
-
-// Affichage d'un texte d'intro :
-function drawLetsGo() {
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	context.fillStyle = snakeColor;
-	context.font = canvasSetting.getFontStyle();
-	context.textBaseline = "middle";
-	context.textAlign = "center";
-
-	context.fillText("Let's go !", canvasSetting.width / 2, canvasSetting.height / 2);
 }
 
 // Contrôle les collisions :
@@ -117,41 +105,6 @@ function gameOver() {
 	gameArt.color = COLORS.red;
 }
 
-let startGameOverAnimation;
-const gray = new Color(0, 0, 40, 0);
-function drawGameOver(timeStamp) {
-	if (!snake.life) {
-		if (startGameOverAnimation != null) gray.alpha = 0;
-		startGameOverAnimation ??= timeStamp;
-		const delay = timeStamp - startGameOverAnimation;
-		if (gray.alpha < 70) gray.alpha = delay / 15;
-
-		const { width, height } = canvasSetting;
-
-		context.save();
-		context.beginPath();
-
-		gameArt.color = COLORS.red;
-		snake.draw(gameArt);
-		apple.draw(gameArt);
-
-		context.fillStyle = gray.toHsl();
-		context.fillRect(0, 0, width, height);
-
-		const fontSize = 80;
-		context.fillStyle = COLORS.oldWhite;
-		context.font = canvasSetting.getFontStyle({ fontSize });
-
-		delay >= 200 && context.fillText("> <", width / 2, height / 2 - 0.8 * fontSize * gameSetting.resolution);
-		delay >= 500 && context.fillText("GAME", width / 2, height / 2);
-		delay >= 700 && context.fillText("OVER", width / 2, height / 2 + 0.65 * fontSize * gameSetting.resolution);
-
-		context.restore();
-
-		delay <= 800 && requestAnimationFrame(drawGameOver);
-	}
-}
-
 // Quand le serpent mange une pomme :
 function scoreThatApple() {
 	score++;
@@ -177,11 +130,17 @@ function reload() {
 	snake.rebornWith(gameSetting.initialSnakeBody);
 
 	score = 0;
-	tryAgain = false;
 	gameLoopDelay = gameSetting.initialSpeed;
 
+	stopAnimGameOver();
 	requestAnimationFrame(refreshCanvas);
 }
+
+const { animGameOver, stopAnimGameOver } = drawGameState.gameOver(context, () => {
+	gameArt.color = COLORS.red;
+	snake.draw(gameArt);
+	apple.draw(gameArt);
+});
 
 // Boucle de jeu principale :
 function refreshCanvas() {
@@ -201,9 +160,7 @@ function refreshCanvas() {
 		if (snake.life) {
 			setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
 		} else {
-			startGameOverAnimation = null;
-			// Redemarre seulement si la touche est pressée.
-			tryAgain ? reload() : requestAnimationFrame(drawGameOver);
+			animGameOver();
 		}
 	}
 }
@@ -212,28 +169,15 @@ function refreshCanvas() {
 function pauseOrReload() {
 	if (!snake.life) {
 		// Si gameOver :
-		tryAgain = true;
 		reload(); // On relance
 	} else if (!pause) {
 		// Sinon on gère la mise en pause
 		pause = true;
-		drawPause();
+		drawGameState.pause(context);
 	} else {
 		pause = false;
 		requestAnimationFrame(refreshCanvas);
 	}
-}
-
-// Affichage de la pause :
-function drawPause() {
-	context.save();
-	context.beginPath();
-	context.fillStyle = "#333a";
-	context.fillRect(0, 0, canvasSetting.width, canvasSetting.height);
-	context.fillStyle = COLORS.oldWhite;
-	context.font = canvasSetting.getFontStyle();
-	context.fillText("|| Pause ||", canvasSetting.width / 2, canvasSetting.height / 2);
-	context.restore();
 }
 
 // Met à jour l'affichage des scores :
@@ -375,7 +319,7 @@ function selectingStyle(event) {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	apple.draw(gameArt);
 	snake.draw(gameArt);
-	drawPause();
+	drawGameState.pause(context);
 }
 /*
 
