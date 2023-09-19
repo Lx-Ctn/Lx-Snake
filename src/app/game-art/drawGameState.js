@@ -1,4 +1,5 @@
-import COLORS, { Color } from "../Colors";
+import COLORS from "./colors";
+import Color from "@lxweb/color";
 import { gameSetting } from "../gameSetting";
 
 const canvasSetting = gameSetting.canvas;
@@ -57,7 +58,7 @@ function drawGameOver(context, delay, backgroundColor) {
 function animGameOver(context, drawGameSnapshot) {
 	let stopAnimation = false;
 	let timeStampAtStart = null;
-	const gray = new Color(0, 0, 40, 0);
+	const gray = new Color({ saturation: 0, light: 40, alpha: 0 });
 
 	function animLoop(timeStamp) {
 		if (!stopAnimation) {

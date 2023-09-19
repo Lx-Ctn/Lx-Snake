@@ -1,4 +1,4 @@
-import COLORS from "../../Colors";
+import COLORS from "../colors";
 
 export const evil = (context, cellSize) => {
 	const radius = cellSize / 2;

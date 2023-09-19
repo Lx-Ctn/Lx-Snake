@@ -1,5 +1,5 @@
 import "./styles/styles.scss";
-import COLORS from "./app/Colors.js";
+import COLORS from "./app/game-art/colors.js";
 import { Apple } from "./app/Apple";
 import { Snake } from "./app/Snake.js";
 import { GameArt } from "./app/game-art/GameArt.js";
@@ -150,7 +150,7 @@ function refreshCanvas() {
 		// snake.advance();
 		isCollisions() && gameOver(); // Game-over en cas de collision.
 
-		snake.ate(apple) && scoreThatApple(); // Si le serpent mange une pomme.
+		snake.isEating(apple) && scoreThatApple(); // Si le serpent mange une pomme.
 		getScore(); // Mise à jour de l'affichage des scores
 
 		context.clearRect(0, 0, canvas.width, canvas.height);

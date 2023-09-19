@@ -1,4 +1,4 @@
-import COLORS from "../Colors.js";
+import COLORS from "./colors.js";
 import { ARTS } from "./arts";
 
 const snakeColor = COLORS.green;
