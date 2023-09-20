@@ -1,8 +1,3 @@
-/*
-
-
-
-*/
 // Construction des éléments du serpent :
 export class SnakeCell {
 	constructor(coor, direction) {

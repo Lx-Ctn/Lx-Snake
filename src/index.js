@@ -5,23 +5,43 @@ import { Snake } from "./app/Snake.js";
 import { GameArt } from "./app/game-art/GameArt.js";
 import { gameSetting } from "./app/gameSetting";
 import { drawGameState } from "./app/game-art/drawGameState";
+import { handleControls } from "./app/handleControls";
 
-/** @type HTMLCanvasElement */ const canvas = document.querySelector("#mainGame");
-const footerElement = document.getElementById("footer");
-const mainElement = document.getElementById("main");
+export const appElements = {
+	mainElement: document.getElementById("main"),
+	footerElement: document.getElementById("footer"),
+	/** @type HTMLCanvasElement */ canvas: document.querySelector("#mainGame"),
 
-let context;
-let pause;
-let gameLoopDelay = gameSetting.initialSpeed; // Time between frames : shorter increase game speed;
+	currentScoreElement: document.getElementById("currentScore"),
+	bestScoreElement: document.getElementById("bestScore"),
 
-let gameArt;
+	// Setting panel :
+	setting: document.getElementById("setting"),
+	settingIcon: document.getElementById("settingIcon"),
+	exitIcon: document.getElementById("exitSetting"),
+	/** @type HTMLCanvasElement */ snakePreviewCanvas: document.querySelector("#snakePreview"),
+};
 
-let snake;
-let apple;
-
-let score = 0;
+const {
+	canvas,
+	mainElement,
+	currentScoreElement,
+	bestScoreElement,
+	setting,
+	settingIcon,
+	exitIcon,
+	snakePreviewCanvas,
+} = appElements;
+const canvasSetting = gameSetting.canvas;
 const lastBestScore = localStorage.getItem("snakeBestScore");
-let bestScore = lastBestScore ? +lastBestScore : 0;
+
+export const gameState = {
+	gameLoopDelay: gameSetting.initialSpeed, // Time between frames : shorter increase game speed,
+	pause: false,
+
+	score: 0,
+	bestScore: lastBestScore ? +lastBestScore : 0,
+};
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - ajouter un vrai menu différentes catégories ?
@@ -29,11 +49,9 @@ let bestScore = lastBestScore ? +lastBestScore : 0;
 // - Un menu de choix de style, avec choix des couleurs, et une grilles avec l'ensemble des styles déblocables + aperçu
 // - Gameplay + développé avec avancée et évolution, recompense
 
-// TODO: apple drawn after game over
-
-const canvasSetting = gameSetting.canvas;
-
-init();
+export const gameAssets = init();
+const { context, snake, apple } = gameAssets;
+handleControls();
 
 function init() {
 	canvas.width = canvasSetting.width;
@@ -57,16 +75,22 @@ function init() {
 	setCanvasSize();
 	window.addEventListener("resize", setCanvasSize);
 
-	pause = false;
-	context = canvas.getContext("2d");
+	const context = canvas.getContext("2d");
 
-	gameArt = new GameArt(gameSetting.selectedGameArt, context, canvasSetting.cellSize);
-	snake = new Snake(gameSetting.initialSnakeBody);
-	apple = new Apple(gameSetting.initialAppleCoor);
+	const gameArt = new GameArt(gameSetting.selectedGameArt, context, canvasSetting.cellSize);
+	const snake = new Snake(gameSetting.initialSnakeBody);
+	const apple = new Apple(gameSetting.initialAppleCoor);
 
 	getScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
 	drawGameState.letsGo(context);
 	setTimeout(requestAnimationFrame, 1000, refreshCanvas);
+
+	return {
+		context,
+		gameArt,
+		snake,
+		apple,
+	};
 }
 
 // Contrôle les collisions :
@@ -102,19 +126,19 @@ function isCollisions() {
 
 function gameOver() {
 	snake.life = false;
-	gameArt.color = COLORS.red;
+	gameAssets.gameArt.color = COLORS.red;
 }
 
 // Quand le serpent mange une pomme :
 function scoreThatApple() {
-	score++;
-	if (score > bestScore) {
-		bestScore = score;
+	gameState.score++;
+	if (gameState.score > gameState.bestScore) {
+		gameState.bestScore = gameState.score;
 	}
 	const minGameLoopDelay = gameSetting.maxSpeed;
-	gameLoopDelay > minGameLoopDelay
-		? (gameLoopDelay -= gameSetting.acceleration)
-		: (gameLoopDelay = minGameLoopDelay); // Speed-up the game
+	gameState.gameLoopDelay > minGameLoopDelay
+		? (gameState.gameLoopDelay -= gameSetting.acceleration)
+		: (gameState.gameLoopDelay = minGameLoopDelay); // Speed-up the game
 
 	// On génére une nouvelle pomme :
 	do {
@@ -126,25 +150,25 @@ function scoreThatApple() {
 
 // Remet à 0 le jeu après un game-over :
 function reload() {
-	gameArt.color = COLORS.green;
+	gameAssets.gameArt.color = COLORS.green;
 	snake.rebornWith(gameSetting.initialSnakeBody);
 
-	score = 0;
-	gameLoopDelay = gameSetting.initialSpeed;
+	gameState.score = 0;
+	gameState.gameLoopDelay = gameSetting.initialSpeed;
 
 	stopAnimGameOver();
 	requestAnimationFrame(refreshCanvas);
 }
 
 const { animGameOver, stopAnimGameOver } = drawGameState.gameOver(context, () => {
-	gameArt.color = COLORS.red;
-	snake.draw(gameArt);
-	apple.draw(gameArt);
+	gameAssets.gameArt.color = COLORS.red;
+	snake.draw(gameAssets.gameArt);
+	apple.draw(gameAssets.gameArt);
 });
 
 // Boucle de jeu principale :
 function refreshCanvas() {
-	if (!pause) {
+	if (!gameState.pause) {
 		snake.waitForRefresh = false;
 
 		// snake.advance();
@@ -154,11 +178,11 @@ function refreshCanvas() {
 		getScore(); // Mise à jour de l'affichage des scores
 
 		context.clearRect(0, 0, canvas.width, canvas.height);
-		apple.draw(gameArt);
-		snake.draw(gameArt);
+		apple.draw(gameAssets.gameArt);
+		snake.draw(gameAssets.gameArt);
 
 		if (snake.life) {
-			setTimeout(requestAnimationFrame, gameLoopDelay, refreshCanvas);
+			setTimeout(requestAnimationFrame, gameState.gameLoopDelay, refreshCanvas);
 		} else {
 			animGameOver();
 		}
@@ -166,36 +190,32 @@ function refreshCanvas() {
 }
 
 // Gestion de la mise en pause et relance après un game over :
-function pauseOrReload() {
+export function pauseOrReload() {
 	if (!snake.life) {
 		// Si gameOver :
 		reload(); // On relance
-	} else if (!pause) {
+	} else if (!gameState.pause) {
 		// Sinon on gère la mise en pause
-		pause = true;
+		gameState.pause = true;
 		drawGameState.pause(context);
 	} else {
-		pause = false;
+		gameState.pause = false;
 		requestAnimationFrame(refreshCanvas);
 	}
 }
 
 // Met à jour l'affichage des scores :
 function getScore() {
-	document.getElementById("currentScore").innerHTML = score.toString(); // innerHTML correspond au texte entre les tags html de l'élément sélectionné.
-	document.getElementById("bestScore").innerHTML = bestScore.toString();
+	currentScoreElement.textContent = gameState.score.toString();
+	bestScoreElement.textContent = gameState.bestScore.toString();
 	try {
-		localStorage.setItem("snakeBestScore", bestScore.toString());
+		localStorage.setItem("snakeBestScore", gameState.bestScore.toString());
 	} catch (error) {
 		console.log(error);
 	}
 }
 
 // Gestion de l'affichage du menu de réglage :
-const settingIcon = document.getElementById("settingIcon");
-const exitIcon = document.getElementById("exitSetting");
-const setting = document.getElementById("setting");
-/** @type HTMLCanvasElement */ const snakePreviewCanvas = document.querySelector("#snakePreview");
 
 const previewSetting = gameSetting.preview;
 snakePreviewCanvas.width = previewSetting.width;
@@ -217,7 +237,7 @@ exitIcon.addEventListener("click", getSetting);
 function getSetting(event) {
 	event.stopPropagation();
 
-	if (!pause && snake.life) {
+	if (!gameState.pause && snake.life) {
 		pauseOrReload();
 	}
 	getSnakePreview();
@@ -232,12 +252,10 @@ function getSetting(event) {
     })
     */
 
-let blockClickPropagation = false;
 document.body.addEventListener("click", function (event) {
-	if ((event.target === mainElement || event.target === canvas) && !blockClickPropagation) {
+	if (event.target === mainElement || event.target === canvas) {
 		pauseOrReload();
 	}
-	if (blockClickPropagation) blockClickPropagation = false;
 
 	if (!setting.contains(event.target) && setting.style.display === "block") {
 		getSetting(event);
@@ -267,7 +285,6 @@ function selectingGamePlay(event) {
 		default:
 			throw new Error("Invalid Gameplay");
 	}
-	apple.draw(gameArt); // Met à jour le canvas pour afficher le nouveau mode.
 }
 
 // Gestion du selecteur de style :
@@ -315,172 +332,9 @@ function selectingStyle(event) {
 	getSnakePreview();
 
 	// Met à jour du canvas du jeu pour afficher le nouveau mode :
-	gameArt = new GameArt(gameSetting.selectedGameArt, context, canvasSetting.cellSize);
+	gameAssets.gameArt = new GameArt(gameSetting.selectedGameArt, context, canvasSetting.cellSize);
 	context.clearRect(0, 0, canvas.width, canvas.height);
-	apple.draw(gameArt);
-	snake.draw(gameArt);
+	apple.draw(gameAssets.gameArt);
+	snake.draw(gameAssets.gameArt);
 	drawGameState.pause(context);
 }
-/*
-
-
-
-
-*/
-// Détecte l'appuis sur les touches :
-
-document.onkeydown = function handleKeyDown(event) {
-	const key = event.key; // renvoi le code de la touche qui a été appuyée
-	let newDirection;
-	switch (key) {
-		case "d": // touche d
-		case "Right": // touche directionnelle droite
-		case "ArrowRight":
-			newDirection = "right";
-			break;
-		case "q": // touche q
-		case "Left": // touche directionnelle gauche
-		case "ArrowLeft":
-			newDirection = "left";
-			break;
-		case "z": // touche z
-		case "Up": // touche directionnelle haut
-		case "ArrowUp":
-			newDirection = "up";
-			break;
-		case "s": // touche s
-		case "Down": // touche directionnelle bas
-		case "ArrowDown":
-			newDirection = "down";
-			break;
-		case "Enter": // touche entrée
-		case " ": // touche espace
-			event.preventDefault();
-			setting.style.display === "block" || pauseOrReload();
-			break;
-		default:
-			return;
-	}
-	if (newDirection) event.preventDefault();
-	pause || snake.setDirection(newDirection);
-};
-/*
-
-
-
-
-*/
-// Détection des gestes tactiles :
-
-let xFirst;
-let yFirst;
-let xMove = 0;
-let yMove = 0;
-let timingStart;
-let timingEnd;
-const gestureSensitivity = gameLoopDelay; // Delais de rafraîchissement du calcul du mouvement au toucher (en ms)
-let waitForMoveDelay = false;
-let killTimeOut = false;
-
-function getNewDirection() {
-	let newDirection;
-
-	if (xMove > 0 && xMove >= Math.abs(yMove)) {
-		newDirection = "right";
-	} else if (yMove > 0 && yMove > Math.abs(xMove)) {
-		newDirection = "down";
-	} else if (xMove < 0 && -xMove >= Math.abs(yMove)) {
-		newDirection = "left";
-	} else {
-		newDirection = "up";
-	}
-
-	return newDirection;
-}
-
-document.body.addEventListener(
-	"touchstart",
-	function (event) {
-		// Target : document au lieu de canvas pour inclure les éléments d'affichage "pause" & "Game Over"
-
-		if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
-			if (getComputedStyle(setting).display === "none") {
-				// Bloque l'appel de l'évenement "click" en même temps que le touch, sauf pour fermer les settings.
-				blockClickPropagation = true;
-			}
-			xFirst = event.touches[0].clientX;
-			yFirst = event.touches[0].clientY;
-			timingStart = performance.now();
-
-			waitForMoveDelay = false; // Réinitialise si le timeOut est kill
-		}
-	},
-	{ passive: false }
-);
-
-document.body.addEventListener(
-	"touchmove",
-	function (event) {
-		if (
-			(event.target === canvas || event.target === footerElement || event.target === mainElement) &&
-			event.touches.length === 1 &&
-			!pause
-		) {
-			event.preventDefault(); // Évite le scroll par défaut pour les gestes tactiles.
-		}
-
-		if (waitForMoveDelay) {
-			return;
-		} // Annule l'event si le delai de rafraîchissement n'est pas atteint.
-
-		if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
-			waitForMoveDelay = true;
-			killTimeOut = false;
-
-			setTimeout(function () {
-				if (killTimeOut) {
-					return;
-				} // Annule la programmation si le doigt est levé avant
-
-				xMove = event.touches[0].clientX - xFirst;
-				yMove = event.touches[0].clientY - yFirst;
-				pause || snake.setDirection(getNewDirection());
-
-				// La boucle est passée, on peut en relancer une nouvelle
-				xFirst = event.touches[0].clientX;
-				yFirst = event.touches[0].clientY;
-				waitForMoveDelay = false;
-			}, gestureSensitivity); // La sensibilité s'accèlère avec la vitesse de jeu
-		}
-	},
-	{ passive: false }
-);
-
-document.body.addEventListener(
-	"touchend",
-	function (event) {
-		if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
-			timingEnd = performance.now();
-			const touchDelay = timingEnd - timingStart;
-
-			if (waitForMoveDelay) {
-				// Si le doigt est levé avant que le timeOut soit appelé
-				killTimeOut = true; // On anule le timeOut
-
-				// Et on fait le calcul maintenant
-				xMove = event.changedTouches[0].clientX - xFirst;
-				yMove = event.changedTouches[0].clientY - yFirst;
-				pause || snake.setDirection(getNewDirection());
-			}
-
-			if (Math.abs(xMove) < 9 && Math.abs(yMove) < 9 && touchDelay < 250) {
-				// Math.abs(number) : renvoi toujours un nombre positif, donc Math.abs(number) === Math.abs(-number)
-				pauseOrReload();
-			}
-
-			xMove = 0;
-			yMove = 0;
-		}
-	},
-	{ passive: false }
-);

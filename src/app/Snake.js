@@ -128,7 +128,7 @@ export class Snake {
 	}
 
 	// Détecte la collision avec une pomme :
-	ate(apple) {
+	isEating(apple) {
 		if (this.head.x === apple.coor.x && this.head.y === apple.coor.y) {
 			this.#appleEaten = true;
 			return true;
