@@ -5,7 +5,8 @@
 :root {
 	--green: hsl(160, 7%, 25%);
 	--red: hsl(345, 90%, 60%);
-	--oldWhite: hsl(34, 14%, 91%);
+	--old-white: hsl(34, 14%, 91%);
+	--visible-green: hsl(160, 70%, 40%);
 
 	font-family: "Courier New", Courier, monospace;
 	font-size: 10px;
@@ -15,6 +16,7 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
+	-webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -31,9 +33,15 @@ main {
 }
 
 #mainGame {
-	background-color: var(--oldWhite);
+	background-color: var(--old-white);
 	width: 100%;
 	display: block;
 	margin: auto;
 	transition: max-width 0.2s, max-height 0.2s;
+
+	&:focus-visible {
+		box-shadow: 0 0 0 2px var(--visible-green);
+		outline: 2px solid var(--old-white);
+		outline-offset: 4px;
+	}
 }

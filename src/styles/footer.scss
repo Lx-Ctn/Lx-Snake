@@ -23,10 +23,31 @@ footer {
 	}
 
 	.author-link {
+		position: relative;
 		display: inline-block;
 		text-decoration: none;
+
 		color: var(--red);
+		font-weight: bold;
 		text-align: center;
+
+		padding-inline: 1em;
+		padding-block: 0.3em 0.8em;
+		border-radius: 4em;
+
+		&::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			border-radius: 4em;
+		}
+		&:focus-visible {
+			outline: 2px solid var(--old-white);
+			&::after {
+				outline: 2px solid var(--visible-green);
+				outline-offset: 4px;
+			}
+		}
 
 		@media (width <= 300px) {
 			display: flex;

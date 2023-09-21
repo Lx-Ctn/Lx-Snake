@@ -1,4 +1,4 @@
-import { appElements, gameAssets, gameState, pauseOrReload } from "..";
+import { appElements, gameAssets, gameState, pauseOrReload, getSetting } from "..";
 
 export function handleControls() {
 	window.addEventListener("keydown", handleKeyDown, { passive: false });
@@ -13,41 +13,52 @@ export function handleControls() {
 
 */
 // Handle keybord navigation :
+const isKeyboardSelectElement = {
+	A: true,
+	BUTTON: true,
+	INPUT: true,
+};
 
 function handleKeyDown(event) {
-	const key = event.key;
-	let newDirection;
-	switch (key) {
-		case "d": // touche d
-		case "Right": // touche directionnelle droite
-		case "ArrowRight":
-			newDirection = "right";
-			break;
-		case "q": // touche q
-		case "Left": // touche directionnelle gauche
-		case "ArrowLeft":
-			newDirection = "left";
-			break;
-		case "z": // touche z
-		case "Up": // touche directionnelle haut
-		case "ArrowUp":
-			newDirection = "up";
-			break;
-		case "s": // touche s
-		case "Down": // touche directionnelle bas
-		case "ArrowDown":
-			newDirection = "down";
-			break;
-		case "Enter": // touche entrée
-		case " ": // touche espace
-			event.preventDefault(); // Prevent scroll down (spacebar default)
-			appElements.setting.style.display === "block" || pauseOrReload();
-			break;
-		default:
-			return;
+	if (appElements.setting.style.display !== "block") {
+		const key = event.key;
+		let newDirection;
+		switch (key) {
+			case "d": // touche d
+			case "Right": // touche directionnelle droite
+			case "ArrowRight":
+				newDirection = "right";
+				break;
+			case "q": // touche q
+			case "Left": // touche directionnelle gauche
+			case "ArrowLeft":
+				newDirection = "left";
+				break;
+			case "z": // touche z
+			case "Up": // touche directionnelle haut
+			case "ArrowUp":
+				newDirection = "up";
+				break;
+			case "s": // touche s
+			case "Down": // touche directionnelle bas
+			case "ArrowDown":
+				newDirection = "down";
+				break;
+			case "Enter": // touche entrée
+			case " ": // touche espace
+				if (!isKeyboardSelectElement[event.target.tagName]) {
+					event.preventDefault(); // Prevent scroll down (spacebar default)
+					pauseOrReload();
+				}
+				break;
+			default:
+				return;
+		}
+		if (newDirection && !isKeyboardSelectElement[event.target.tagName]) event.preventDefault(); // Prevent scroll when using direction
+		gameState.pause || gameAssets.snake.setDirection(newDirection);
+	} else {
+		event.key === "Escape" && getSetting(event);
 	}
-	if (newDirection) event.preventDefault(); // Prevent scroll when using direction
-	gameState.pause || gameAssets.snake.setDirection(newDirection);
 }
 
 /*

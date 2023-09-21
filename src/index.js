@@ -234,7 +234,7 @@ function getSnakePreview() {
 settingIcon.addEventListener("click", getSetting);
 exitIcon.addEventListener("click", getSetting);
 
-function getSetting(event) {
+export function getSetting(event) {
 	event.stopPropagation();
 
 	if (!gameState.pause && snake.life) {
@@ -242,6 +242,7 @@ function getSetting(event) {
 	}
 	getSnakePreview();
 	setting.style.display = setting.style.display === "block" ? "none" : "block";
+	canvas.setAttribute("tabindex", setting.style.display === "block" ? "none" : "0");
 }
 
 /*
