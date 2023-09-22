@@ -58,6 +58,8 @@ function init() {
 	canvas.width = canvasSetting.width;
 	canvas.height = canvasSetting.height;
 	const ratio = canvasSetting.width / canvasSetting.height;
+	const radius = `${canvasSetting.cellSize / 2 / gameSetting.resolution}px`;
+	canvas.style.borderRadius = radius;
 	let headerHeight = "130px";
 	const bottomMargin = "0.8em";
 
@@ -242,8 +244,10 @@ export function getSetting(event) {
 		pauseOrReload();
 	}
 	getSnakePreview();
-	setting.style.display = setting.style.display === "block" ? "none" : "block";
-	canvas.setAttribute("tabindex", setting.style.display === "block" ? "none" : "0");
+	const isSettingOpen = getComputedStyle(setting).display !== "none";
+	console.log(setting, isSettingOpen);
+	setting.style.display = isSettingOpen ? "none" : "block";
+	canvas.style.display = isSettingOpen ? "block" : "none";
 }
 
 /*
@@ -252,7 +256,7 @@ export function getSetting(event) {
         // Met en plein écran
         document.fullscreenElement != null ? document.exitFullscreen() : document.body.requestFullscreen();
     })
-    */
+*/
 
 document.body.addEventListener("click", function (event) {
 	if (event.target === mainElement || event.target === canvas || event.target === footerElement) {
@@ -295,38 +299,46 @@ for (const style of styleSelector) {
 	style.addEventListener("click", selectingStyle);
 }
 
+const fieldsets = document.querySelectorAll("fieldset");
 function selectingStyle(event) {
 	const radius = `${canvasSetting.cellSize / 2 / gameSetting.resolution}px`;
+
 	switch (event.currentTarget.id) {
 		case "classicSelector":
 			gameSetting.selectedGameArt = "classic";
 			canvas.style.borderRadius = "0";
 			setting.style.borderRadius = "0";
+			for (const fieldset of fieldsets) fieldset.style.borderRadius = "0";
 			break;
 
 		case "fullSelector":
 			gameSetting.selectedGameArt = "full";
 			canvas.style.borderRadius = "0";
 			setting.style.borderRadius = "0";
+			for (const fieldset of fieldsets) fieldset.style.borderRadius = "0";
+
 			break;
 
 		case "roundedSelector":
 			gameSetting.selectedGameArt = "rounded";
 			canvas.style.borderRadius = radius;
-			setting.style.borderRadius = radius;
+			setting.style.borderRadius = "";
+			for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
 			break;
 
 		case "bigHeadSelector":
 			gameSetting.selectedGameArt = "bigHead";
 			canvas.style.borderRadius = radius;
-			setting.style.borderRadius = radius;
+			setting.style.borderRadius = "";
+			for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
 			break;
 
 		case "evilSelector":
 		default:
 			gameSetting.selectedGameArt = "evil";
 			canvas.style.borderRadius = radius;
-			setting.style.borderRadius = radius;
+			setting.style.borderRadius = "";
+			for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
 			break;
 	}
 
