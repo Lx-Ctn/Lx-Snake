@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
 	entry: {
@@ -20,9 +21,8 @@ module.exports = {
 			{
 				test: /.s?css$/i,
 				use: [
-					"style-loader",
+					MiniCssExtractPlugin.loader,
 					"css-loader",
-					"sass-loader",
 					{
 						loader: "postcss-loader",
 						options: {
@@ -40,6 +40,7 @@ module.exports = {
 							},
 						},
 					},
+					"sass-loader",
 				],
 			},
 			{
@@ -54,6 +55,7 @@ module.exports = {
 			template: path.join(__dirname, "./src/index.html"),
 			favicon: path.join(__dirname, "./src/assets/lx-snake-icon.png"),
 		}),
+		new MiniCssExtractPlugin(),
 	],
 	stats: "minimal",
 	devtool: "source-map",
