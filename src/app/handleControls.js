@@ -9,8 +9,6 @@ export function handleControls() {
 /*
 
 
-
-
 */
 // Handle keybord navigation :
 const isKeyboardSelectElement = {
@@ -20,32 +18,32 @@ const isKeyboardSelectElement = {
 };
 
 function handleKeyDown(event) {
-	if (appElements.setting.style.display !== "block") {
+	if (getComputedStyle(appElements.setting).display === "none") {
 		const key = event.key;
 		let newDirection;
 		switch (key) {
-			case "d": // touche d
-			case "Right": // touche directionnelle droite
+			case "d":
+			case "Right":
 			case "ArrowRight":
 				newDirection = "right";
 				break;
-			case "q": // touche q
-			case "Left": // touche directionnelle gauche
+			case "q":
+			case "Left":
 			case "ArrowLeft":
 				newDirection = "left";
 				break;
-			case "z": // touche z
-			case "Up": // touche directionnelle haut
+			case "z":
+			case "Up":
 			case "ArrowUp":
 				newDirection = "up";
 				break;
-			case "s": // touche s
-			case "Down": // touche directionnelle bas
+			case "s":
+			case "Down":
 			case "ArrowDown":
 				newDirection = "down";
 				break;
-			case "Enter": // touche entrée
-			case " ": // touche espace
+			case "Enter":
+			case " ": // space bar
 				if (!isKeyboardSelectElement[event.target.tagName]) {
 					event.preventDefault(); // Prevent scroll down (spacebar default)
 					pauseOrReload();
@@ -64,113 +62,75 @@ function handleKeyDown(event) {
 /*
 
 
-
-
 */
 // Handle touch gestures :
 
-let xFirst;
-let yFirst;
-let xMove = 0;
-let yMove = 0;
-let timingStart;
-let timingEnd;
+let startCoor;
 let waitForMoveDelay = false;
-let killTimeOut = false;
+let nextDirectionUpdate;
 
-function getNewDirection() {
+function setNewDirection(moveDelta) {
 	let newDirection;
+	const { x, y } = moveDelta;
 
-	if (xMove > 0 && xMove >= Math.abs(yMove)) {
-		newDirection = "right";
-	} else if (yMove > 0 && yMove > Math.abs(xMove)) {
-		newDirection = "down";
-	} else if (xMove < 0 && -xMove >= Math.abs(yMove)) {
-		newDirection = "left";
-	} else {
-		newDirection = "up";
-	}
+	if (x > 0 && x >= Math.abs(y)) newDirection = "right";
+	else if (y > 0 && y > Math.abs(x)) newDirection = "down";
+	else if (x < 0 && -x >= Math.abs(y)) newDirection = "left";
+	else newDirection = "up";
 
-	return newDirection;
+	gameAssets.snake.setDirection(newDirection);
+}
+
+function getCurrentCoor(event) {
+	return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+}
+
+function updateDirection(event) {
+	const currentCoor = getCurrentCoor(event);
+	const moveDelta = { x: currentCoor.x - startCoor.x, y: currentCoor.y - startCoor.y };
+	setNewDirection(moveDelta);
+}
+
+function initLoop(event) {
+	startCoor = getCurrentCoor(event);
+	waitForMoveDelay = false;
+}
+
+function isTouchInGameZone(event) {
+	const { mainElement, canvas, footerElement } = appElements;
+	return event.target === canvas || event.target === footerElement || event.target === mainElement;
+}
+
+function isGameOn() {
+	return !gameState.pause && gameAssets.snake.life;
 }
 
 function handleTouchStart(event) {
-	const { mainElement, canvas, footerElement, setting } = appElements;
-
-	if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
-		if (getComputedStyle(setting).display === "none") {
-			// Block the automatic "click" event call when a "touch" event is fired, except to close the setting panel.
-			event.preventDefault();
-		}
-		xFirst = event.touches[0].clientX;
-		yFirst = event.touches[0].clientY;
-		timingStart = performance.now();
-
-		waitForMoveDelay = false; // Réinitialise si le timeOut est kill
+	if (isGameOn() && isTouchInGameZone(event)) {
+		initLoop(event);
 	}
 }
 
 function handleTouchMove(event) {
-	const { mainElement, canvas, footerElement } = appElements;
+	if (isGameOn() && isTouchInGameZone(event)) {
+		if (event.touches.length === 1) event.preventDefault(); // stop default scroll with gesture, except if the game is paused or using multi finger
 
-	if (
-		(event.target === canvas || event.target === footerElement || event.target === mainElement) &&
-		event.touches.length === 1 &&
-		!gameState.pause
-	) {
-		event.preventDefault(); // Évite le scroll par défaut pour les gestes tactiles.
-	}
+		if (waitForMoveDelay) return; // Cancel until delay .
 
-	if (waitForMoveDelay) {
-		return;
-	} // Annule l'event si le delai de rafraîchissement n'est pas atteint.
-
-	if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
 		waitForMoveDelay = true;
-		killTimeOut = false;
+		const gestureSensitivity = gameAssets.gameLoopDelay; // Sensitivity grow with game speed
 
-		const gestureSensitivity = gameAssets.gameLoopDelay; // Delais de rafraîchissement du calcul du mouvement au toucher (en ms)
-
-		setTimeout(function () {
-			if (killTimeOut) {
-				return;
-			} // Annule la programmation si le doigt est levé avant
-
-			xMove = event.touches[0].clientX - xFirst;
-			yMove = event.touches[0].clientY - yFirst;
-			gameState.pause || gameAssets.snake.setDirection(getNewDirection());
-
-			// La boucle est passée, on peut en relancer une nouvelle
-			xFirst = event.touches[0].clientX;
-			yFirst = event.touches[0].clientY;
-			waitForMoveDelay = false;
-		}, gestureSensitivity); // La sensibilité s'accèlère avec la vitesse de jeu
+		nextDirectionUpdate = setTimeout(function () {
+			updateDirection(event);
+			initLoop(event);
+		}, gestureSensitivity); // Delay between each movement update (ms)
 	}
 }
 
 function handleTouchEnd(event) {
-	const { mainElement, canvas, footerElement } = appElements;
-
-	if (event.target === canvas || event.target === footerElement || event.target === mainElement) {
-		timingEnd = performance.now();
-		const touchDelay = timingEnd - timingStart;
-
-		if (waitForMoveDelay) {
-			// Si le doigt est levé avant que le timeOut soit appelé
-			killTimeOut = true; // On anule le timeOut
-
-			// Et on fait le calcul maintenant
-			xMove = event.changedTouches[0].clientX - xFirst;
-			yMove = event.changedTouches[0].clientY - yFirst;
-			gameState.pause || gameAssets.snake.setDirection(getNewDirection());
-		}
-
-		if (Math.abs(xMove) < 9 && Math.abs(yMove) < 9 && touchDelay < 250) {
-			// Math.abs(number) : renvoi toujours un nombre positif, donc Math.abs(number) === Math.abs(-number)
-			pauseOrReload();
-		}
-
-		xMove = 0;
-		yMove = 0;
+	if (isGameOn() && waitForMoveDelay && isTouchInGameZone(event)) {
+		// if the finger is released before the next update :
+		clearTimeout(nextDirectionUpdate); // We cancel the next update,
+		updateDirection(event); // And do it now.
 	}
 }

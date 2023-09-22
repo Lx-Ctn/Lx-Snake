@@ -25,6 +25,7 @@ export const appElements = {
 const {
 	canvas,
 	mainElement,
+	footerElement,
 	currentScoreElement,
 	bestScoreElement,
 	setting,
@@ -254,7 +255,7 @@ export function getSetting(event) {
     */
 
 document.body.addEventListener("click", function (event) {
-	if (event.target === mainElement || event.target === canvas) {
+	if (event.target === mainElement || event.target === canvas || event.target === footerElement) {
 		pauseOrReload();
 	}
 
