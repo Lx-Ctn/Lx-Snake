@@ -1,9 +1,13 @@
+import { appElements } from "../../..";
+import { settingElements } from "../../handleGameOptions";
+import { gameSetting } from "../../gameSetting";
 import COLORS from "../colors";
 
 export const bigHead = (context, cellSize) => {
 	const radius = cellSize / 2;
 	const fullCircle = coor => context.arc(coor.x + radius, coor.y + radius, radius, 0, Math.PI * 2); // x, y : coordonnées du centre, rayon, angleDépart, angleFin (Math.PI * 2 : cercle complet, Math.PI : demi-cercle), sensAntiHoraire.,
 
+	setGlobalArtStyle();
 	return {
 		snake: {
 			head: coor => {
@@ -71,3 +75,13 @@ export const bigHead = (context, cellSize) => {
 		apple: fullCircle,
 	};
 };
+
+function setGlobalArtStyle() {
+	const { canvas } = appElements;
+	const { setting, fieldsets } = settingElements;
+	const radius = `${gameSetting.canvas.cellSize / 2 / gameSetting.resolution}px`;
+
+	canvas.style.borderRadius = radius;
+	setting.style.borderRadius = "";
+	for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
+}

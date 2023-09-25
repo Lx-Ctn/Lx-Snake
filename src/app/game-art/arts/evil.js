@@ -1,3 +1,6 @@
+import { appElements } from "../../..";
+import { settingElements } from "../../handleGameOptions";
+import { gameSetting } from "../../gameSetting";
 import COLORS from "../colors";
 
 export const evil = (context, cellSize) => {
@@ -18,6 +21,7 @@ export const evil = (context, cellSize) => {
 		context.closePath();
 	};
 
+	setGlobalArtStyle();
 	return {
 		snake: {
 			head: coor => {
@@ -114,3 +118,13 @@ export const evil = (context, cellSize) => {
 		apple: fullCircle,
 	};
 };
+
+function setGlobalArtStyle() {
+	const { canvas } = appElements;
+	const { setting, fieldsets } = settingElements;
+	const radius = `${gameSetting.canvas.cellSize / 2 / gameSetting.resolution}px`;
+
+	canvas.style.borderRadius = radius;
+	setting.style.borderRadius = "";
+	for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
+}

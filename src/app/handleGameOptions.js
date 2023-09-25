@@ -5,6 +5,7 @@ import { GameArt } from "./game-art/GameArt";
 import { drawGameState } from "./game-art/drawGameState";
 import COLORS from "./game-art/colors";
 
+// Get all option panel elements :
 export const settingElements = {
 	settingIcon: document.getElementById("settingIcon"),
 	exitIcon: document.getElementById("exitSetting"),
@@ -12,7 +13,7 @@ export const settingElements = {
 	/** @type HTMLCanvasElement */ snakePreviewCanvas: document.querySelector("#snakePreview"),
 
 	gamePlaySelector: document.getElementsByClassName("gamePlaySelector"),
-	styleSelector: document.getElementsByClassName("styleSelector"),
+	gameArtSelector: document.getElementsByClassName("gameArtSelector"),
 	fieldsets: document.querySelectorAll("fieldset"),
 };
 
@@ -20,6 +21,7 @@ let snakePreviewCtx;
 const previewSetting = gameSetting.preview;
 const snakePreview = new Snake(previewSetting.snakePreviewBody);
 
+// Handle option panel display :
 export function handleGameOptions() {
 	snakePreviewCtx = initPreviewCanvas(previewSetting);
 
@@ -30,12 +32,10 @@ export function handleGameOptions() {
 	for (const gamePlay of settingElements.gamePlaySelector) {
 		gamePlay.addEventListener("click", selectingGamePlay);
 	}
-	for (const style of settingElements.styleSelector) {
-		style.addEventListener("click", selectingStyle);
+	for (const style of settingElements.gameArtSelector) {
+		style.addEventListener("click", selectingGameArt);
 	}
 }
-
-// Handle option panel display :
 
 function initPreviewCanvas(previewSetting) {
 	const { snakePreviewCanvas } = settingElements;
@@ -61,7 +61,6 @@ export function isSettingOpen() {
 
 export function toggleSetting(event) {
 	event.stopPropagation(); // otherwise trigger window listener for click outside the setting panel and close immediately
-	const { setting } = settingElements;
 
 	if (!gameState.pause && gameAssets.snake.life) {
 		pauseOrReload();
@@ -69,18 +68,16 @@ export function toggleSetting(event) {
 	getSnakePreview();
 
 	const isSettingPanelOpen = isSettingOpen();
-	setting.style.display = isSettingPanelOpen ? "none" : "block";
+	settingElements.setting.style.display = isSettingPanelOpen ? "none" : "block";
 	appElements.canvas.style.display = isSettingPanelOpen ? "block" : "none";
 }
 
 function closeSettingIfClickOutside(event) {
-	const { setting } = settingElements;
-	const isClickOutsideSetting = !setting.contains(event.target);
-
+	const isClickOutsideSetting = !settingElements.setting.contains(event.target);
 	isSettingOpen() && isClickOutsideSetting && toggleSetting(event);
 }
 
-// Gestion du selecteur de mode de jeu :
+// Handle gameplay selection :
 function selectingGamePlay(event) {
 	const { canvas } = appElements;
 	switch (event.currentTarget.id) {
@@ -99,58 +96,16 @@ function selectingGamePlay(event) {
 	}
 }
 
-// Gestion du selecteur de style :
+// Handle game art selection :
+function selectingGameArt(event) {
+	gameSetting.selectedGameArt = event.currentTarget.dataset.gameArt;
 
-function selectingStyle(event) {
-	const { canvas } = appElements;
-	const { setting, fieldsets } = settingElements;
-	const radius = `${gameSetting.canvas.cellSize / 2 / gameSetting.resolution}px`;
-
-	switch (event.currentTarget.id) {
-		case "classicSelector":
-			gameSetting.selectedGameArt = "classic";
-			canvas.style.borderRadius = "0";
-			setting.style.borderRadius = "0";
-			for (const fieldset of fieldsets) fieldset.style.borderRadius = "0";
-			break;
-
-		case "fullSelector":
-			gameSetting.selectedGameArt = "full";
-			canvas.style.borderRadius = "0";
-			setting.style.borderRadius = "0";
-			for (const fieldset of fieldsets) fieldset.style.borderRadius = "0";
-
-			break;
-
-		case "roundedSelector":
-			gameSetting.selectedGameArt = "rounded";
-			canvas.style.borderRadius = radius;
-			setting.style.borderRadius = "";
-			for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
-			break;
-
-		case "bigHeadSelector":
-			gameSetting.selectedGameArt = "bigHead";
-			canvas.style.borderRadius = radius;
-			setting.style.borderRadius = "";
-			for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
-			break;
-
-		case "evilSelector":
-		default:
-			gameSetting.selectedGameArt = "evil";
-			canvas.style.borderRadius = radius;
-			setting.style.borderRadius = "";
-			for (const fieldset of fieldsets) fieldset.style.borderRadius = "";
-			break;
-	}
-
-	// Mise à jour du preview du snake avec le nouveau style :
+	// Update preview of the snake with new art :
 	getSnakePreview();
 
-	// Met à jour du canvas du jeu pour afficher le nouveau mode :
+	// Update main game with new art :
 	gameAssets.gameArt = new GameArt(gameSetting.selectedGameArt, gameAssets.context, gameSetting.canvas.cellSize);
-	gameAssets.context.clearRect(0, 0, canvas.width, canvas.height);
+	gameAssets.context.clearRect(0, 0, appElements.canvas.width, appElements.canvas.height);
 	gameAssets.apple.draw(gameAssets.gameArt);
 	gameAssets.snake.draw(gameAssets.gameArt);
 	drawGameState.pause(gameAssets.context);
