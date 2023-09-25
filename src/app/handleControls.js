@@ -1,10 +1,26 @@
-import { appElements, gameAssets, gameState, pauseOrReload, getSetting } from "..";
+import { appElements, gameAssets, gameState, pauseOrReload } from "..";
+import { toggleSetting, isSettingOpen } from "./handleGameOptions";
 
 export function handleControls() {
+	window.addEventListener("click", handleClick, { passive: false });
 	window.addEventListener("keydown", handleKeyDown, { passive: false });
 	window.addEventListener("touchstart", handleTouchStart, { passive: false });
 	window.addEventListener("touchmove", handleTouchMove, { passive: false });
 	window.addEventListener("touchend", handleTouchEnd, { passive: false });
+}
+/*
+
+
+*/
+// Handle pause or reload if click in the game zone :
+
+function isInGameZone(event) {
+	const { mainElement, canvas, footerElement } = appElements;
+	return event.target === canvas || event.target === footerElement || event.target === mainElement;
+}
+
+function handleClick(event) {
+	!isSettingOpen() && isInGameZone(event) && pauseOrReload();
 }
 /*
 
@@ -18,7 +34,7 @@ const isKeyboardSelectElement = {
 };
 
 function handleKeyDown(event) {
-	if (getComputedStyle(appElements.setting).display === "none") {
+	if (!isSettingOpen()) {
 		const key = event.key;
 		let newDirection;
 		switch (key) {
@@ -55,7 +71,7 @@ function handleKeyDown(event) {
 		if (newDirection && !isKeyboardSelectElement[event.target.tagName]) event.preventDefault(); // Prevent scroll when using direction
 		gameState.pause || gameAssets.snake.setDirection(newDirection);
 	} else {
-		event.key === "Escape" && getSetting(event);
+		event.key === "Escape" && toggleSetting(event);
 	}
 }
 
@@ -96,23 +112,18 @@ function initLoop(event) {
 	waitForMoveDelay = false;
 }
 
-function isTouchInGameZone(event) {
-	const { mainElement, canvas, footerElement } = appElements;
-	return event.target === canvas || event.target === footerElement || event.target === mainElement;
-}
-
 function isGameOn() {
 	return !gameState.pause && gameAssets.snake.life;
 }
 
 function handleTouchStart(event) {
-	if (isGameOn() && isTouchInGameZone(event)) {
+	if (isGameOn() && isInGameZone(event)) {
 		initLoop(event);
 	}
 }
 
 function handleTouchMove(event) {
-	if (isGameOn() && isTouchInGameZone(event)) {
+	if (isGameOn() && isInGameZone(event)) {
 		if (event.touches.length === 1) event.preventDefault(); // stop default scroll with gesture, except if the game is paused or using multi finger
 
 		if (waitForMoveDelay) return; // Cancel until delay .
@@ -128,9 +139,18 @@ function handleTouchMove(event) {
 }
 
 function handleTouchEnd(event) {
-	if (isGameOn() && waitForMoveDelay && isTouchInGameZone(event)) {
+	if (isGameOn() && waitForMoveDelay && isInGameZone(event)) {
 		// if the finger is released before the next update :
 		clearTimeout(nextDirectionUpdate); // We cancel the next update,
 		updateDirection(event); // And do it now.
 	}
 }
+
+/*
+// Test fullscreen :
+check "esc" key conflict to exit fullsreen
+const headline = document.getElementById("title");
+headline.addEventListener("click", function () {
+	document.fullscreenElement != null ? document.exitFullscreen() : document.body.requestFullscreen();
+});
+ */
