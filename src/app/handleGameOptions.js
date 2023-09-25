@@ -79,21 +79,8 @@ function closeSettingIfClickOutside(event) {
 
 // Handle gameplay selection :
 function selectingGamePlay(event) {
-	const { canvas } = appElements;
-	switch (event.currentTarget.id) {
-		case "wallsSelector":
-			gameSetting.selectedGamePlay = "walls";
-			canvas.style.border = "3px solid " + COLORS.red;
-			break;
-
-		case "mirrorSelector":
-			gameSetting.selectedGamePlay = "mirror";
-			canvas.style.border = "none";
-			break;
-
-		default:
-			throw new Error("Invalid Gameplay");
-	}
+	gameSetting.selectedGamePlay = event.currentTarget.dataset.gamePlay;
+	appElements.canvas.style.border = gameSetting.selectedGamePlay === "walls" ? "3px solid " + COLORS.red : "none";
 }
 
 // Handle game art selection :
