@@ -35,11 +35,12 @@ export class GameArt {
 	set appleArt(appleArt) {
 		this.drawApple = appleCoor => {
 			const coor = { x: appleCoor.x * this.cellSize, y: appleCoor.y * this.cellSize };
+			const currentColor = this.color;
 			this.color = appleColor;
 			this.beginDraw(coor);
 			appleArt(coor);
 			this.closeDraw();
-			this.color = snakeColor;
+			this.color = currentColor;
 		};
 	}
 
