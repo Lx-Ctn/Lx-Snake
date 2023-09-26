@@ -86,13 +86,11 @@ export class Snake {
 			}
 		}
 
-		if (test) {
-			// test: recupère le mouvement suivant avant son affichage pour vérifier une éventuelle collision
-			return nextCell;
-		} else {
-			this.body.unshift(nextCell);
-			!this.#appleEaten && this.body.pop();
-		}
+		// test: recupère le mouvement suivant avant son affichage pour vérifier une éventuelle collision
+		if (test) return nextCell;
+
+		this.body.unshift(nextCell);
+		!this.#appleEaten && this.body.pop(); // If a apple is eaten, we keep the  last cell to grow
 	}
 
 	// Contrôle la direction du serpent :

@@ -18,188 +18,196 @@ export const appElements = {
 	mainElement: document.getElementById("main"),
 	footerElement: document.getElementById("footer"),
 	/** @type HTMLCanvasElement */ canvas: document.querySelector("#mainGame"),
-
-	currentScoreElement: document.getElementById("currentScore"),
-	bestScoreElement: document.getElementById("bestScore"),
+	currentScore: document.getElementById("currentScore"),
+	bestScore: document.getElementById("bestScore"),
 };
-
-const { canvas, currentScoreElement, bestScoreElement } = appElements;
-const canvasSetting = gameSetting.canvas;
-const lastBestScore = localStorage.getItem("snakeBestScore");
 
 export const gameState = {
 	gameLoopDelay: gameSetting.initialSpeed, // Time between frames : shorter increase game speed,
 	pause: false,
-
-	score: 0,
-	bestScore: lastBestScore ? +lastBestScore : 0,
+	isBorderCollision: false,
+	currentScore: 0,
+	bestScore: getLastBestScore(),
 };
 
-export const gameAssets = init();
-const { context, snake, apple } = gameAssets;
-handleControls();
-handleGameOptions();
+function getGameAssets() {
+	const context = appElements.canvas.getContext("2d");
+	return {
+		context,
+		gameArt: new GameArt(gameSetting.selectedGameArt, context, gameSetting.canvas.cellSize),
+		snake: new Snake(gameSetting.initialSnakeBody),
+		apple: new Apple(gameSetting.initialAppleCoor),
+	};
+}
+export const gameAssets = getGameAssets();
+
+init();
 
 function init() {
-	canvas.width = canvasSetting.width;
-	canvas.height = canvasSetting.height;
-	const ratio = canvasSetting.width / canvasSetting.height;
-	const radius = `${canvasSetting.cellSize / 2 / gameSetting.resolution}px`;
-	canvas.style.borderRadius = radius;
-	let headerHeight = "130px";
-	const bottomMargin = "0.8em";
+	const { width, height, cellSize } = gameSetting.canvas;
+	appElements.canvas.width = width;
+	appElements.canvas.height = height;
 
-	function setCanvasSize() {
-		headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
-		canvas.style.maxWidth = `min(${
-			canvasSetting.width / gameSetting.resolution
-		}px, calc((100dvh - ${headerHeight}) * ${ratio}))`;
-		canvas.style.maxHeight = `min(${
-			canvasSetting.height / gameSetting.resolution
-		}px, calc(100dvh - ${headerHeight} - ${bottomMargin}))`;
-		// On high pixel density screen, if the height is not round, it could lead to differences between the render of the canvas and the canvas element itself
-		// a fine line appear at the bottom, and we don't want that
-		canvas.style.height = `${Math.round(window.innerWidth / ratio)}px`;
-	}
+	const radius = `${cellSize / 2 / gameSetting.resolution}px`;
+	appElements.canvas.style.borderRadius = radius;
+
 	setCanvasSize();
 	window.addEventListener("resize", setCanvasSize);
 
-	const context = canvas.getContext("2d");
+	updateScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
+	handleControls();
+	handleGameOptions();
 
-	const gameArt = new GameArt(gameSetting.selectedGameArt, context, canvasSetting.cellSize);
-	const snake = new Snake(gameSetting.initialSnakeBody);
-	const apple = new Apple(gameSetting.initialAppleCoor);
-
-	getScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
-	drawGameState.letsGo(context);
+	drawGameState.backgroud(gameAssets.context);
+	drawGameState.letsGo(gameAssets.context);
 	setTimeout(requestAnimationFrame, 1000, refreshCanvas);
-
-	return {
-		context,
-		gameArt,
-		snake,
-		apple,
-	};
 }
 
-// Contrôle les collisions :
-function isCollisions() {
-	// Détecte les collisions aux bords :
-	let borderCollision = false;
+function setCanvasSize() {
+	const { canvas } = appElements;
+	const { width, height } = gameSetting.canvas;
+	const resolution = gameSetting.resolution;
+	const headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
+	const bottomMargin = "0.8em";
+	const ratio = width / height;
 
-	switch (gameSetting.selectedGamePlay) {
-		case "walls": {
-			// test: recupère le mouvement suivant avant son affichage pour vérifier une éventuelle collision
-			const nextHeadPosition = snake.advance({ test: true });
-			borderCollision =
-				nextHeadPosition.x < 0 ||
-				nextHeadPosition.x > canvasSetting.maxCellsInWidth - 1 ||
-				nextHeadPosition.y < 0 ||
-				nextHeadPosition.y > canvasSetting.maxCellsInHeight - 1;
-			if (!borderCollision) snake.advance({ nextCell: nextHeadPosition });
-			break;
+	canvas.style.maxWidth = `min(${width / resolution}px, calc((100dvh - ${headerHeight}) * ${ratio}))`;
+	canvas.style.maxHeight = `min(${height / resolution}px, calc(100dvh - ${headerHeight} - ${bottomMargin}))`;
+}
+
+// Main game loop :
+function refreshCanvas() {
+	if (!gameState.pause) {
+		const { snake, apple } = gameAssets;
+		snake.waitForRefresh = false;
+
+		const nextHeadPosition = snake.advance({ test: true }); // Test: get next cell before apply to snake body to test collision
+		handleBorderBehavior(nextHeadPosition); // Will update nextPosition coordonates or isBorderCollision base on current gamePlay
+
+		if (isCollisions()) {
+			gameOver();
+			return;
 		}
-		case "mirror":
-			snake.advance();
-			if (snake.head.x < 0) snake.head.x = canvasSetting.maxCellsInWidth - 1;
-			if (snake.head.x > canvasSetting.maxCellsInWidth - 1) snake.head.x = 0;
-			if (snake.head.y < 0) snake.head.y = canvasSetting.maxCellsInHeight - 1;
-			if (snake.head.y > canvasSetting.maxCellsInHeight - 1) snake.head.y = 0;
-			break;
-		default:
-			throw new Error("Invalid Gameplay");
-	}
 
-	return borderCollision || snake.isAutoCollision();
+		snake.advance({ nextCell: nextHeadPosition });
+		drawGameFrame();
+		snake.isEating(apple) && scoreThatApple();
+
+		setTimeout(requestAnimationFrame, gameState.gameLoopDelay, refreshCanvas);
+	}
 }
+
+export function drawGameFrame(mainColor = null) {
+	const { snake, apple, gameArt, context } = gameAssets;
+	drawGameState.backgroud(context);
+	if (mainColor) gameArt.color = mainColor;
+	apple.draw(gameArt);
+	snake.draw(gameArt);
+}
+
+function handleBorderBehavior(nextPosition) {
+	switch (gameSetting.selectedGamePlay) {
+		case "walls":
+			isBorderCollision(nextPosition);
+			break;
+		case "mirror":
+		default:
+			mirroringPosition(nextPosition);
+	}
+}
+
+function mirroringPosition(coor) {
+	const { maxCellsInWidth, maxCellsInHeight } = gameSetting.canvas;
+	if (coor.x < 0) coor.x = maxCellsInWidth - 1;
+	if (coor.x > maxCellsInWidth - 1) coor.x = 0;
+	if (coor.y < 0) coor.y = maxCellsInHeight - 1;
+	if (coor.y > maxCellsInHeight - 1) coor.y = 0;
+}
+
+function isBorderCollision(coor) {
+	const { maxCellsInWidth, maxCellsInHeight } = gameSetting.canvas;
+	gameState.isBorderCollision =
+		coor.x < 0 || coor.x > maxCellsInWidth - 1 || coor.y < 0 || coor.y > maxCellsInHeight - 1;
+}
+
+function isCollisions() {
+	return gameState.isBorderCollision || gameAssets.snake.isAutoCollision();
+}
+
+const { animGameOver, stopAnimGameOver } = drawGameState.gameOver(gameAssets.context);
 
 function gameOver() {
-	snake.life = false;
-	gameAssets.gameArt.color = COLORS.red;
+	gameAssets.snake.life = false;
+	animGameOver();
 }
 
-// Quand le serpent mange une pomme :
+// When snake eat a apple :
 function scoreThatApple() {
-	gameState.score++;
-	if (gameState.score > gameState.bestScore) {
-		gameState.bestScore = gameState.score;
-	}
+	gameState.currentScore++;
+	updateScore();
+	speedUpTheGame();
+	getNewApple();
+}
+
+function speedUpTheGame() {
 	const minGameLoopDelay = gameSetting.maxSpeed;
 	gameState.gameLoopDelay > minGameLoopDelay
 		? (gameState.gameLoopDelay -= gameSetting.acceleration)
-		: (gameState.gameLoopDelay = minGameLoopDelay); // Speed-up the game
+		: (gameState.gameLoopDelay = minGameLoopDelay);
+}
 
-	// On génére une nouvelle pomme :
+function getNewApple() {
+	const { snake, apple } = gameAssets;
 	do {
-		const randomX = Math.floor(Math.random() * canvasSetting.maxCellsInWidth);
-		const randomY = Math.floor(Math.random() * canvasSetting.maxCellsInHeight);
+		const randomX = Math.floor(Math.random() * gameSetting.canvas.maxCellsInWidth);
+		const randomY = Math.floor(Math.random() * gameSetting.canvas.maxCellsInHeight);
 		apple.setNewPosition({ x: randomX, y: randomY });
 	} while (apple.isOnSnake(snake));
 }
 
-// Remet à 0 le jeu après un game-over :
-function reload() {
-	gameAssets.gameArt.color = COLORS.green;
-	snake.rebornWith(gameSetting.initialSnakeBody);
-
-	gameState.score = 0;
-	gameState.gameLoopDelay = gameSetting.initialSpeed;
-
-	stopAnimGameOver();
-	requestAnimationFrame(refreshCanvas);
-}
-
-const { animGameOver, stopAnimGameOver } = drawGameState.gameOver(context, () => {
-	gameAssets.gameArt.color = COLORS.red;
-	snake.draw(gameAssets.gameArt);
-	apple.draw(gameAssets.gameArt);
-});
-
-// Boucle de jeu principale :
-function refreshCanvas() {
-	if (!gameState.pause) {
-		snake.waitForRefresh = false;
-
-		// snake.advance();
-		isCollisions() && gameOver(); // Game-over en cas de collision.
-
-		snake.isEating(apple) && scoreThatApple(); // Si le serpent mange une pomme.
-		getScore(); // Mise à jour de l'affichage des scores
-
-		context.clearRect(0, 0, canvas.width, canvas.height);
-		apple.draw(gameAssets.gameArt);
-		snake.draw(gameAssets.gameArt);
-
-		if (snake.life) {
-			setTimeout(requestAnimationFrame, gameState.gameLoopDelay, refreshCanvas);
-		} else {
-			animGameOver();
-		}
-	}
-}
-
 // Gestion de la mise en pause et relance après un game over :
 export function pauseOrReload() {
-	if (!snake.life) {
-		// Si gameOver :
-		reload(); // On relance
-	} else if (!gameState.pause) {
-		// Sinon on gère la mise en pause
+	gameAssets.snake.life ? togglePause() : reload();
+}
+
+function togglePause() {
+	if (!gameState.pause) {
 		gameState.pause = true;
-		drawGameState.pause(context);
+		drawGameState.pause(gameAssets.context);
 	} else {
 		gameState.pause = false;
 		requestAnimationFrame(refreshCanvas);
 	}
 }
 
-// Met à jour l'affichage des scores :
-function getScore() {
-	currentScoreElement.textContent = gameState.score.toString();
-	bestScoreElement.textContent = gameState.bestScore.toString();
-	try {
-		localStorage.setItem("snakeBestScore", gameState.bestScore.toString());
-	} catch (error) {
-		console.log(error);
+// Reset game after game-over :
+function reload() {
+	stopAnimGameOver();
+
+	gameAssets.gameArt.color = COLORS.green;
+	gameAssets.snake.rebornWith(gameSetting.initialSnakeBody);
+
+	gameState.gameLoopDelay = gameSetting.initialSpeed;
+	gameState.currentScore = 0;
+	updateScore();
+
+	requestAnimationFrame(refreshCanvas);
+}
+
+// Handle scores :
+function getLastBestScore() {
+	return +localStorage.getItem("snakeBestScore"); // if fail : +null === 0
+}
+
+function updateScore() {
+	if (gameState.currentScore > gameState.bestScore) {
+		gameState.bestScore = gameState.currentScore;
+		try {
+			localStorage.setItem("snakeBestScore", gameState.bestScore.toString());
+		} catch (error) {
+			console.error(error);
+		}
 	}
+	appElements.currentScore.textContent = gameState.currentScore;
+	appElements.bestScore.textContent = gameState.bestScore;
 }

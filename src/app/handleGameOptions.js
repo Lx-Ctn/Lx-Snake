@@ -1,4 +1,4 @@
-import { appElements, gameState, gameAssets, pauseOrReload } from "..";
+import { appElements, gameState, gameAssets, pauseOrReload, drawGameFrame } from "..";
 import { gameSetting } from "./gameSetting";
 import { Snake } from "./Snake";
 import { GameArt } from "./game-art/GameArt";
@@ -92,8 +92,6 @@ function selectingGameArt(event) {
 
 	// Update main game with new art :
 	gameAssets.gameArt = new GameArt(gameSetting.selectedGameArt, gameAssets.context, gameSetting.canvas.cellSize);
-	gameAssets.context.clearRect(0, 0, appElements.canvas.width, appElements.canvas.height);
-	gameAssets.apple.draw(gameAssets.gameArt);
-	gameAssets.snake.draw(gameAssets.gameArt);
+	drawGameFrame();
 	drawGameState.pause(gameAssets.context);
 }
