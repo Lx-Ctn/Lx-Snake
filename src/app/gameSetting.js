@@ -46,14 +46,8 @@ export const gameSetting = {
 		width: resolution * DEFAULT.WIDTH * DEFAULT.CELL_SIZE,
 		height: resolution * DEFAULT.HEIGHT * DEFAULT.CELL_SIZE,
 		cellSize: resolution * DEFAULT.CELL_SIZE,
-
-		get maxCellsInWidth() {
-			return this.width / this.cellSize;
-		},
-
-		get maxCellsInHeight() {
-			return this.height / this.cellSize;
-		},
+		maxCellsInWidth: DEFAULT.WIDTH,
+		maxCellsInHeight: DEFAULT.HEIGHT,
 
 		getFontStyle: ({ fontSize } = { fontSize: DEFAULT.FONT_SIZE }) =>
 			`bold ${resolution * fontSize}px "Courier New", Courier, monospace`,
