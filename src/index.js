@@ -7,6 +7,7 @@ import { gameSetting } from "./app/gameSetting";
 import { drawGameState } from "./app/game-art/drawGameState";
 import { handleControls } from "./app/handleControls";
 import { handleGameOptions } from "./app/handleGameOptions";
+import { handleResponsive } from "./app/handleResponsive";
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - ajouter un vrai menu différentes catégories ?
@@ -15,6 +16,7 @@ import { handleGameOptions } from "./app/handleGameOptions";
 // - Gameplay + développé avec avancée et évolution, recompense
 
 export const appElements = {
+	headerElement: document.getElementById("header"),
 	mainElement: document.getElementById("main"),
 	footerElement: document.getElementById("footer"),
 	/** @type HTMLCanvasElement */ canvas: document.querySelector("#mainGame"),
@@ -44,15 +46,11 @@ export const gameAssets = getGameAssets();
 init();
 
 function init() {
-	const { width, height, cellSize } = gameSetting.canvas;
-	appElements.canvas.width = width;
-	appElements.canvas.height = height;
+	appElements.canvas.width = gameSetting.canvas.width;
+	appElements.canvas.height = gameSetting.canvas.height;
 
-	const radius = `${cellSize / 2 / gameSetting.resolution}px`;
-	appElements.canvas.style.borderRadius = radius;
-
-	setCanvasSize();
-	window.addEventListener("resize", setCanvasSize);
+	handleResponsive();
+	window.addEventListener("resize", handleResponsive);
 
 	updateScore(); // from init to get bestScore from localStorage
 	handleControls();
@@ -61,18 +59,6 @@ function init() {
 	drawGameState.backgroud(gameAssets.context);
 	drawGameState.letsGo(gameAssets.context);
 	setTimeout(requestAnimationFrame, 1000, refreshCanvas);
-}
-
-function setCanvasSize() {
-	const { canvas } = appElements;
-	const { width, height } = gameSetting.canvas;
-	const resolution = gameSetting.resolution;
-	const headerHeight = getComputedStyle(document.getElementById("header")).minHeight;
-	const bottomMargin = "0.8em";
-	const ratio = width / height;
-
-	canvas.style.maxWidth = `min(${width / resolution}px, calc((100dvh - ${headerHeight}) * ${ratio}))`;
-	canvas.style.maxHeight = `min(${height / resolution}px, calc(100dvh - ${headerHeight} - ${bottomMargin}))`;
 }
 
 // Main game loop :
