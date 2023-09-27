@@ -54,7 +54,7 @@ function init() {
 	setCanvasSize();
 	window.addEventListener("resize", setCanvasSize);
 
-	updateScore(); // Dès l'init pour récupérer le "BestScore" du localStorage
+	updateScore(); // from init to get bestScore from localStorage
 	handleControls();
 	handleGameOptions();
 
@@ -165,7 +165,7 @@ function getNewApple() {
 	} while (apple.isOnSnake(snake));
 }
 
-// Gestion de la mise en pause et relance après un game over :
+// handle pause or reload after game over :
 export function pauseOrReload() {
 	gameAssets.snake.life ? togglePause() : reload();
 }

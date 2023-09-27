@@ -2,11 +2,11 @@ import { appElements, gameAssets, gameState, pauseOrReload } from "..";
 import { toggleSetting, isSettingOpen } from "./handleGameOptions";
 
 export function handleControls() {
-	window.addEventListener("click", handleClick, { passive: false });
-	window.addEventListener("keydown", handleKeyDown, { passive: false });
-	window.addEventListener("touchstart", handleTouchStart, { passive: false });
-	window.addEventListener("touchmove", handleTouchMove, { passive: false });
-	window.addEventListener("touchend", handleTouchEnd, { passive: false });
+	document.body.addEventListener("click", handleClick, { passive: false });
+	document.body.addEventListener("keydown", handleKeyDown, { passive: false });
+	document.body.addEventListener("touchstart", handleTouchStart, { passive: false });
+	document.body.addEventListener("touchmove", handleTouchMove, { passive: false });
+	document.body.addEventListener("touchend", handleTouchEnd, { passive: false });
 }
 /*
 

@@ -27,7 +27,7 @@ export function handleGameOptions() {
 
 	settingElements.settingIcon.addEventListener("click", toggleSetting);
 	settingElements.exitIcon.addEventListener("click", toggleSetting);
-	window.addEventListener("click", closeSettingIfClickOutside);
+	document.body.addEventListener("click", closeSettingIfClickOutside);
 
 	for (const gamePlay of settingElements.gamePlaySelector) {
 		gamePlay.addEventListener("click", selectingGamePlay);
