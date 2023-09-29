@@ -19,6 +19,7 @@ export const appElements = {
 	headerElement: document.getElementById("header"),
 	mainElement: document.getElementById("main"),
 	footerElement: document.getElementById("footer"),
+	footerLinkElement: document.querySelector(".author-link"),
 	/** @type HTMLCanvasElement */ canvas: document.querySelector("#mainGame"),
 	currentScore: document.getElementById("currentScore"),
 	bestScore: document.getElementById("bestScore"),

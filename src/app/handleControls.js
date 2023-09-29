@@ -2,6 +2,7 @@ import { appElements, gameAssets, gameState, pauseOrReload } from "..";
 import { toggleSetting, isSettingOpen } from "./handleGameOptions";
 
 export function handleControls() {
+	appElements.footerLinkElement.addEventListener("click", handleTouchOnLink, { passive: false });
 	document.body.addEventListener("click", handleClick, { passive: false });
 	document.body.addEventListener("keydown", handleKeyDown, { passive: false });
 	document.body.addEventListener("touchstart", handleTouchStart, { passive: false });
@@ -14,14 +15,45 @@ export function handleControls() {
 */
 // Handle pause or reload if click in the game zone :
 
-function isInGameZone(event) {
-	const { mainElement, canvas, footerElement } = appElements;
-	return event.target === canvas || event.target === footerElement || event.target === mainElement;
-}
-
 function handleClick(event) {
 	!isSettingOpen() && isInGameZone(event) && pauseOrReload();
 }
+
+// On touch devices, we want to see the game, so we mainly play we our finger under, on the footer (it also more accessible).
+// But here is the signature with the link to my portfolio...
+// And when the game is on, a touch should pause the game, and not spoil the xp by opening a link.
+let isClickTriggerByTouch = false;
+let nextDisableClickTriggerByTouch;
+const MAX_TIME_FOR_TOUCH_AND_HOLD = 1500; // ms  (android touch & hold long accessibility setting)
+
+// We set this on touch start, cause on many touch device, the click event is simulated, behaved like a mouseEvent with no way to know if it was triggered by touch.
+function setTouchTriggeredClick() {
+	isClickTriggerByTouch = true;
+	// More and more device can have a mouse AND a touch screen.
+	// So we can't rely on the simple fact that there is a touch screen to disable the link
+	clearTimeout(nextDisableClickTriggerByTouch);
+	nextDisableClickTriggerByTouch = setTimeout(() => {
+		isClickTriggerByTouch = false;
+	}, MAX_TIME_FOR_TOUCH_AND_HOLD);
+}
+function showFooterLinkDisabled() {
+	appElements.footerLinkElement.style.opacity = "0.4";
+}
+
+function showFooterLinkenabled() {
+	appElements.footerLinkElement.style.opacity = "";
+}
+
+function handleTouchOnLink(event) {
+	if (isClickTriggerByTouch && isGameOn()) {
+		event.preventDefault();
+		showFooterLinkenabled();
+		isClickTriggerByTouch = false;
+	} else {
+		event.stopPropagation();
+	}
+}
+
 /*
 
 
@@ -112,19 +144,17 @@ function initLoop(event) {
 	waitForMoveDelay = false;
 }
 
-function isGameOn() {
-	return !gameState.pause && gameAssets.snake.life;
-}
-
 function handleTouchStart(event) {
 	if (isGameOn() && isInGameZone(event)) {
+		event.target === appElements.footerLinkElement && setTouchTriggeredClick();
+		showFooterLinkDisabled();
 		initLoop(event);
 	}
 }
 
 function handleTouchMove(event) {
 	if (isGameOn() && isInGameZone(event)) {
-		if (event.touches.length === 1) event.preventDefault(); // stop default scroll with gesture, except if the game is paused or using multi finger
+		if (event.touches.length === 1) event.preventDefault(); // stop default scroll with gesture, except if the game is paused or using multiple fingers
 
 		if (waitForMoveDelay) return; // Cancel until delay .
 
@@ -139,11 +169,33 @@ function handleTouchMove(event) {
 }
 
 function handleTouchEnd(event) {
-	if (isGameOn() && waitForMoveDelay && isInGameZone(event)) {
-		// if the finger is released before the next update :
-		clearTimeout(nextDirectionUpdate); // We cancel the next update,
-		updateDirection(event); // And do it now.
+	if (isGameOn() && isInGameZone(event)) {
+		showFooterLinkenabled();
+
+		if (waitForMoveDelay) {
+			// if the finger is released before the next update :
+			clearTimeout(nextDirectionUpdate); // We cancel the next update,
+			updateDirection(event); // And do it now.
+		}
 	}
+}
+/*
+
+
+*/ // Utils :
+
+function isInGameZone(event) {
+	const { mainElement, canvas, footerElement, footerLinkElement } = appElements;
+	return (
+		event.target === canvas ||
+		event.target === mainElement ||
+		event.target === footerElement ||
+		event.target === footerLinkElement
+	);
+}
+
+function isGameOn() {
+	return !gameState.pause && gameAssets.snake.life;
 }
 
 /*
