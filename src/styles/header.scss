@@ -76,6 +76,7 @@ h1 {
 
 	svg {
 		transition: transform 1.1s;
+		overflow: visible;
 	}
 	&:hover svg {
 		transform: rotate(160deg);
