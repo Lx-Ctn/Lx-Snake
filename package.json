@@ -1,7 +1,7 @@
 {
 	"name": "lx-snake",
-	"version": "1.0.0",
-	"description": "",
+	"version": "2.0.0",
+	"description": "A snake game running on JavaScript canvas",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
 		"start": "webpack serve"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Alexandre COTTIN (Lx-Ctn)",
 	"license": "ISC",
 	"devDependencies": {
 		"@babel/cli": "^7.22.15",
