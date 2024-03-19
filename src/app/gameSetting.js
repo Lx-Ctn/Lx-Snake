@@ -24,6 +24,7 @@ const DEFAULT = {
 
 const resolution = window.devicePixelRatio || 1;
 
+/** All game setting in a object to keep live update of the values (passed by ref)  */
 export const gameSetting = {
 	initialSpeed: DEFAULT.INITIAL_SPEED,
 	acceleration: DEFAULT.ACCELERATION,
@@ -40,9 +41,10 @@ export const gameSetting = {
 	],
 	initialAppleCoor: { x: 6, y: 8 },
 
+	/** Main game canvas setting */
 	canvas: {
-		// On tiens compte de la résolution de l'écran pour garder un affichage correct sur retina display :
-		// On multiplie la taille du canvas, puis divise en css
+		// Taking screen resolution into consideration to keep a nice display quality on retina screen :
+		// Canvas size is multiply, and will be divided with CSS
 		width: resolution * DEFAULT.WIDTH * DEFAULT.CELL_SIZE,
 		height: resolution * DEFAULT.HEIGHT * DEFAULT.CELL_SIZE,
 		cellSize: resolution * DEFAULT.CELL_SIZE,
@@ -53,6 +55,7 @@ export const gameSetting = {
 			`bold ${resolution * fontSize}px "Courier New", Courier, monospace`,
 	},
 
+	/** Canvas setting for art preview in the art selection panel */
 	preview: {
 		width: resolution * (DEFAULT.PREVIEW.SNAKE_LENGTH + 2) * DEFAULT.PREVIEW.CELL_SIZE,
 		height: resolution * DEFAULT.PREVIEW.HEIGHT * DEFAULT.PREVIEW.CELL_SIZE,

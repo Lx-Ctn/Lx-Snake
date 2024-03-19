@@ -6,13 +6,15 @@ import { drawGameFrame } from "../..";
 const canvasSetting = gameSetting.canvas;
 
 export const drawGameState = {
-	backgroud: drawBackground,
+	background: drawBackground,
 	letsGo: drawLetsGo,
 	pause: drawPause,
 	gameOver: animGameOver,
 };
 
-// Game background :
+/** Game background display
+ * @param {CanvasRenderingContext2D} context - The 2d context of the canvas
+ */
 function drawBackground(context) {
 	context.save();
 	context.fillStyle = COLORS.oldWhite;
@@ -20,7 +22,9 @@ function drawBackground(context) {
 	context.restore();
 }
 
-// Intro text display :
+/** Intro text display
+ * @param {CanvasRenderingContext2D} context - The 2d context of the canvas
+ */
 function drawLetsGo(context) {
 	context.save();
 	context.fillStyle = COLORS.green;
@@ -29,7 +33,9 @@ function drawLetsGo(context) {
 	context.restore();
 }
 
-// Pause state display :
+/** Pause state display
+ * @param {CanvasRenderingContext2D} context - The 2d context of the canvas
+ */
 function drawPause(context) {
 	context.save();
 	context.beginPath();
@@ -41,7 +47,11 @@ function drawPause(context) {
 	context.restore();
 }
 
-// Game-Over state display :
+/** Game-Over state display.
+ * @param {CanvasRenderingContext2D} context - The 2d context of the canvas.
+ * @param {number} delay - Cuurent delay of the animation.
+ * @param {Color} backgroundColor - Color of the bacjground, for dynamic colors.
+ */
 function drawGameOver(context, delay, backgroundColor) {
 	const { width, height } = canvasSetting;
 
@@ -62,12 +72,15 @@ function drawGameOver(context, delay, backgroundColor) {
 	context.restore();
 }
 
-// Animate Game-Over state display :
+/** Animate Game-Over state display
+ * @param {CanvasRenderingContext2D} context - The 2d context of the canvas.
+ */
 function animGameOver(context) {
 	let stopAnimation = false;
 	let timeStampAtStart = null;
 	const gray = new Color({ saturation: 0, light: 40, alpha: 0 });
 
+	/** @type {FrameRequestCallback} */
 	function animLoop(timeStamp) {
 		if (!stopAnimation) {
 			if (timeStampAtStart !== null) gray.alpha = 0;
@@ -83,11 +96,13 @@ function animGameOver(context) {
 	}
 
 	return {
+		/** Launch the gameover animation */
 		animGameOver: () => {
 			stopAnimation = false;
 			timeStampAtStart = null;
 			requestAnimationFrame(animLoop);
 		},
+		/** Stop the gameover animation */
 		stopAnimGameOver: () => {
 			stopAnimation = true;
 		},

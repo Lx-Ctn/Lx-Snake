@@ -1,10 +1,17 @@
 import { SnakeCell } from "./SnakeCell.js";
+/**
+ * @typedef {{coor:{x:number,y:number},direction:("right"|"left"|"up"|"down")}} SnakeCellConstructor
+ */
 
-// Construction du serpent :
+/**  Bulding the snake */
 export class Snake {
 	#nextDirection = "";
 	#appleEaten = false;
 
+	/**
+	 * Bulding the snake
+	 * @param {SnakeCellConstructor[]} body - The body of the snake.
+	 */
 	constructor(body) {
 		this.life = true;
 		this.waitForRefresh = false;
@@ -12,19 +19,34 @@ export class Snake {
 		this.#nextDirection = this.head.direction;
 	}
 
+	/**
+	 * Get the head cell of the snake.
+	 * @returns {SnakeCell} The head cell.
+	 */
 	get head() {
-		// besoin d'un getter sinon head est fixé lors de l'instanciation et ne suis pas body dynamiquement
+		// Need a getter to keep it dynamic (else it's fixed when instantiated)
 		return this.body[0];
 	}
 
+	/**
+	 * Get the tail cell of the snake.
+	 * @returns {SnakeCell} The tail cell.
+	 */
 	get tail() {
-		// idem
+		// Same
 		return this.body[this.body.length - 1];
 	}
 
-	// Dessine le serpent :
+	/**
+	 * @typedef {import('./game-art/GameArt.js').GameArt} GameArt
+	 */
+
+	/**
+	 * Draw the snake
+	 * @param {GameArt} gameArt - The visual art style of the snake.
+	 */
 	draw(gameArt) {
-		// La queue récupére la direction de la cellule précédente pour anticiper les tournants :
+		// The tail retrieves the previous cell direction to anticipate turns :
 		this.tail.direction = this.body[this.body.length - 2].direction;
 		gameArt.drawSnake.tail(this.tail);
 
@@ -38,7 +60,7 @@ export class Snake {
 				let drawDirection;
 				switch (cellDirection) {
 					case "up":
-						// nextCellDirection ne peut être "up" puisque nextCellDirection !== direction, ni "down" puique contraint par setDirection() :
+						// nextCellDirection can't be "up" since nextCellDirection !== direction, neither "down" since constrained by setDirection() :
 						drawDirection = nextCellDirection === "right" ? "right" : "left";
 						break;
 					case "right":
@@ -57,43 +79,47 @@ export class Snake {
 			}
 		}
 
-		gameArt.drawSnake.head(this.head); // La tête est affichée en dernière pour apparaître au dessus en cas de collision
+		gameArt.drawSnake.head(this.head); // Head is the last drawn to be seen on top, especialy in case of collision when it's became red.
 	}
 
-	// Fait avancer le serpent selon la direction :
+	/**
+	 * Move the snake depending on the direction
+	 * @param {Object} [params={test:false,nextCell:null}] - Named parameters to bring clarity.
+	 * @param {boolean} [params.test=false] - If true, get the next move before drawing it to check for potential collision.
+	 * @param {SnakeCell} [params.nextCell] - The next cell to go to.
+	 * */
 	advance({ test = false, nextCell } = { test: false, nextCell: null }) {
 		if (!nextCell) {
-			nextCell = new SnakeCell({ x: this.head.x, y: this.head.y }, this.head.direction);
+			nextCell = new SnakeCell({ x: this.head.x, y: this.head.y }, this.#nextDirection);
 			switch (this.#nextDirection) {
 				case "right":
 					nextCell.x += 1;
-					nextCell.direction = "right";
 					break;
 				case "left":
 					nextCell.x -= 1;
-					nextCell.direction = "left";
 					break;
 				case "up":
 					nextCell.y -= 1;
-					nextCell.direction = "up";
 					break;
 				case "down":
 					nextCell.y += 1;
-					nextCell.direction = "down";
 					break;
 				default:
 					throw new Error("Invalid direction");
 			}
 		}
 
-		// test: recupère le mouvement suivant avant son affichage pour vérifier une éventuelle collision
+		// Test: Get the next move before drawing it to check for potential collision
 		if (test) return nextCell;
 
 		this.body.unshift(nextCell);
-		!this.#appleEaten && this.body.pop(); // If a apple is eaten, we keep the  last cell to grow
+		!this.#appleEaten && this.body.pop(); // If a apple is eaten, we keep the last cell to grow
 	}
 
-	// Contrôle la direction du serpent :
+	/**
+	 * Handle snake direction
+	 * @param {("right"|"left"|"up"|"down")} newDirection - Set the direction for the next move.
+	 * */
 	setDirection(newDirection) {
 		let allowedDirection;
 		switch (this.#nextDirection) {
@@ -110,11 +136,14 @@ export class Snake {
 		}
 		if (allowedDirection.includes(newDirection) && !this.waitForRefresh) {
 			this.#nextDirection = newDirection;
-			this.waitForRefresh = true; // Attend l'affichage d'une direction avant d'en choisir une nouvelle.
+			this.waitForRefresh = true; // Wait for the direction to be drawn before setting a new one.
 		}
 	}
 
-	// Détecte une collision avec son propre corps :
+	/**
+	 * Detects a collision with its own body
+	 * @returns {boolean} true if there is a collision.
+	 */
 	isAutoCollision() {
 		const tail = this.body.slice(1);
 		for (const cell of tail) {
@@ -125,7 +154,10 @@ export class Snake {
 		return false;
 	}
 
-	// Détecte la collision avec une pomme :
+	/**
+	 * Detects a collision with the apple
+	 * @returns {boolean} true if the apple is eaten.
+	 */
 	isEating(apple) {
 		if (this.head.x === apple.coor.x && this.head.y === apple.coor.y) {
 			this.#appleEaten = true;
@@ -135,7 +167,10 @@ export class Snake {
 		return false;
 	}
 
-	// Réinitialise le serpent :
+	/**
+	 * Reset the snake
+	 * @param {SnakeCellConstructor[]} snakeStartBody
+	 */
 	rebornWith(snakeStartBody) {
 		this.life = true;
 		this.body = snakeStartBody.map(cell => new SnakeCell(cell.coor, cell.direction));

@@ -3,12 +3,19 @@ import { settingElements } from "../../handleGameOptions";
 import { gameSetting } from "../../gameSetting";
 import COLORS from "../colors";
 
+/** Return the instruction to draw on the canvas for each type of cell.
+ * @param {CanvasRenderingContext2D} context - 2d context of the canvas.
+ * @param {number} cellSize - Size of the grid division on the canvas.
+ */
 export const evil = (context, cellSize) => {
 	const radius = cellSize / 2;
 	const scale = 1.2;
 	const bodyScale = 0.8;
 	const xOffset = (cellSize * scale) / 4; // Décalage : la tête dépasse en arrière
 
+	/** Set the instruction to draw the cell on the canvas.
+	 * @param {{x:number, y:number}} coor - The coordinate of the cell to draw.
+	 */
 	const fullCircle = coor => context.arc(coor.x + radius, coor.y + radius, radius, 0, Math.PI * 2); // x, y : coordonnées du centre, rayon, angleDépart, angleFin (Math.PI * 2 : cercle complet, Math.PI : demi-cercle), sensAntiHoraire.,
 	const fallenSquare = (coor, xOffset = 0, bodyScale = 1) => {
 		const diagonal = scale * cellSize * Math.SQRT2;
@@ -24,12 +31,15 @@ export const evil = (context, cellSize) => {
 	setGlobalArtStyle();
 	return {
 		snake: {
+			/** Set the instruction to draw the cell on the canvas.
+			 * @param {{x:number, y:number}} coor - The coordinate of the cell to draw.
+			 */
 			head: coor => {
 				fallenSquare(coor, -xOffset);
 				context.arc(coor.x + radius * 0.9 * scale, coor.y + radius, radius / scale, 0, Math.PI * 2);
 				context.fill();
 
-				// Yeux :
+				// Eyes :
 				context.beginPath();
 				context.fillStyle = COLORS.red;
 				const eyeRadius = radius / scale / 2.6;
@@ -46,7 +56,7 @@ export const evil = (context, cellSize) => {
 				);
 				context.fill();
 
-				// Langue :
+				// Tongue :
 				context.fillStyle = COLORS.red;
 				const tongueLength = cellSize / 2;
 				const tongueWidth = cellSize / 5;
@@ -63,6 +73,9 @@ export const evil = (context, cellSize) => {
 				context.fill();
 			},
 
+			/** Set the instruction to draw the cell on the canvas.
+			 * @param {{x:number, y:number}} coor - The coordinate of the cell to draw.
+			 */
 			body: coor => {
 				fallenSquare(coor, -xOffset, bodyScale);
 				context.fillStyle = COLORS.green;
@@ -74,6 +87,10 @@ export const evil = (context, cellSize) => {
 				context.fill();
 			},
 
+			/** Set the instruction to draw the cell on the canvas.
+			 * @param {{x:number, y:number}} coor - The coordinate of the cell to draw.
+			 * @param {("left"|"right")} turn - The direction of the turn.
+			 */
 			turn: (coor, turn) => {
 				const scale = 0.9;
 				const startingAngle = { x: coor.x, y: coor.y + (turn === "right" ? cellSize : 0) };
@@ -100,6 +117,9 @@ export const evil = (context, cellSize) => {
 				context.fill();
 			},
 
+			/** Set the instruction to draw the cell on the canvas.
+			 * @param {{x:number, y:number}} coor - The coordinate of the cell to draw.
+			 */
 			tail: coor => {
 				context.arc(coor.x + radius * 1.5, coor.y + radius, radius, 0, Math.PI * 2);
 				context.arc(coor.x + radius / 1.5, coor.y + radius, radius / 1.4, 0, Math.PI * 2);
@@ -119,6 +139,7 @@ export const evil = (context, cellSize) => {
 	};
 };
 
+/** Set some CSS styles in addition to the canvas art */
 function setGlobalArtStyle() {
 	const { canvas } = appElements;
 	const { setting, fieldsets } = settingElements;

@@ -5,7 +5,7 @@ import { GameArt } from "./game-art/GameArt";
 import { drawGameState } from "./game-art/drawGameState";
 import COLORS from "./game-art/colors";
 
-// Get all option panel elements :
+/** Get all option panel elements */
 export const settingElements = {
 	settingIcon: document.getElementById("settingIcon"),
 	exitIcon: document.getElementById("exitSetting"),
@@ -21,7 +21,7 @@ let snakePreviewCtx;
 const previewSetting = gameSetting.preview;
 const snakePreview = new Snake(previewSetting.snakePreviewBody);
 
-// Handle option panel display :
+/** Handle option panel display */
 export function handleGameOptions() {
 	snakePreviewCtx = initPreviewCanvas(previewSetting);
 
@@ -37,6 +37,11 @@ export function handleGameOptions() {
 	}
 }
 
+/**
+ * Set the canvas configuration for the preview of the snake art style.
+ * @param {{height:number, width:number}} previewSetting  - Initial setting for the preview canvas
+ * @returns {CanvasRenderingContext2D} The 2D context for the preview canvas.
+ */
 function initPreviewCanvas(previewSetting) {
 	const { snakePreviewCanvas } = settingElements;
 	snakePreviewCanvas.width = previewSetting.width;
@@ -47,6 +52,7 @@ function initPreviewCanvas(previewSetting) {
 	return snakePreviewCtx;
 }
 
+/** Draw the preview of the current selected art style in the canvas */
 function getSnakePreview() {
 	const { snakePreviewCanvas } = settingElements;
 	snakePreviewCtx.clearRect(0, 0, snakePreviewCanvas.width, snakePreviewCanvas.height);
@@ -55,12 +61,14 @@ function getSnakePreview() {
 	snakePreview.draw(previewGameArt);
 }
 
+/** Check if the setting panel is currently open */
 export function isSettingOpen() {
 	return getComputedStyle(settingElements.setting).display !== "none";
 }
 
+/** Open/close the setting panel */
 export function toggleSetting(event) {
-	event.stopPropagation(); // otherwise trigger window listener for click outside the setting panel and close immediately
+	event.stopPropagation(); // Otherwise trigger window listener for click outside the setting panel and close immediately after opening
 
 	if (!gameState.pause && gameAssets.snake.life) {
 		pauseOrReload();
@@ -72,18 +80,19 @@ export function toggleSetting(event) {
 	appElements.canvas.style.display = isSettingPanelOpen ? "block" : "none";
 }
 
+/** Close the setting panel when we click outside of it */
 function closeSettingIfClickOutside(event) {
 	const isClickOutsideSetting = !settingElements.setting.contains(event.target);
 	isSettingOpen() && isClickOutsideSetting && toggleSetting(event);
 }
 
-// Handle gameplay selection :
+/** Handle gameplay selection */
 function selectingGamePlay(event) {
 	gameSetting.selectedGamePlay = event.currentTarget.dataset.gamePlay;
 	appElements.canvas.style.border = gameSetting.selectedGamePlay === "walls" ? "3px solid " + COLORS.red : "none";
 }
 
-// Handle game art selection :
+/** Handle game art selection */
 function selectingGameArt(event) {
 	gameSetting.selectedGameArt = event.currentTarget.dataset.gameArt;
 

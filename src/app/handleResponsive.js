@@ -1,6 +1,7 @@
 import { appElements } from "..";
 import { gameSetting } from "./gameSetting";
 
+/** scale the canvas and some style depending on the window size */
 export function handleResponsive() {
 	setCanvasSize();
 	setScaledRadius();
