@@ -121,6 +121,8 @@ export class Snake {
 	 * @param {("right"|"left"|"up"|"down")} newDirection - Set the direction for the next move.
 	 * */
 	setDirection(newDirection) {
+		if (this.waitForRefresh) return;
+
 		let allowedDirection;
 		switch (this.#nextDirection) {
 			case "right":
@@ -134,7 +136,7 @@ export class Snake {
 			default:
 				throw new Error("Invalid direction");
 		}
-		if (allowedDirection.includes(newDirection) && !this.waitForRefresh) {
+		if (allowedDirection.includes(newDirection)) {
 			this.#nextDirection = newDirection;
 			this.waitForRefresh = true; // Wait for the direction to be drawn before setting a new one.
 		}
