@@ -155,7 +155,7 @@ function setNewDirection(moveDelta) {
  * @returns {{x:number, y:number}}
  */
 function getCurrentCoor(event) {
-	return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+	return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
 }
 
 /** Get the pointer movement since last update -> update the direction */
@@ -183,17 +183,17 @@ function handleTouchStart(event) {
 /** Called over and over as long as the finger isn't released */
 function handleTouchMove(event) {
 	if (isGameOn() && isInGameZone(event)) {
-		if (event.touches.length === 1) event.preventDefault(); // stop default scroll with gesture, except if the game is paused or using multiple fingers
+		if (event.changedTouches.length === 1) event.preventDefault(); // stop default scroll with gesture, except if the game is paused or using multiple fingers
 
 		if (waitForMoveDelay) return; // Cancel until delay .
-
 		waitForMoveDelay = true;
-		const gestureSensitivity = gameAssets.gameLoopDelay; // Sensitivity grow with game speed
-		console.log({ gestureSensitivity });
+
+		const refreshRate = gameState.gameLoopDelay; // Should match the game speed
+
 		nextDirectionUpdate = setTimeout(function () {
 			updateDirection(event);
 			initLoop(event);
-		}, gestureSensitivity); // Delay between each movement update (ms)
+		}, refreshRate); // Delay between each movement update (ms)
 	}
 }
 
