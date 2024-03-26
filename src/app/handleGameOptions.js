@@ -7,7 +7,7 @@ import COLORS from "./game-art/colors";
 
 /** Get all option panel elements */
 export const settingElements = {
-	settingIcon: document.getElementById("settingIcon"),
+	settingIcon: document.getElementById("setting-icon"),
 	exitIcon: document.getElementById("exitSetting"),
 	setting: document.getElementById("setting"),
 	/** @type HTMLCanvasElement */ snakePreviewCanvas: document.querySelector("#snakePreview"),
@@ -77,6 +77,8 @@ export function toggleSetting(event) {
 
 	const isSettingPanelOpen = isSettingOpen();
 	settingElements.setting.style.display = isSettingPanelOpen ? "none" : "block";
+	settingElements.settingIcon.dataset.settings = isSettingPanelOpen ? "off" : "on";
+	settingElements.settingIcon.title = isSettingPanelOpen ? "Go to settings" : "Exit settings";
 	appElements.canvas.style.display = isSettingPanelOpen ? "block" : "none";
 }
 
