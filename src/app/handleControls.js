@@ -234,12 +234,3 @@ function isInGameZone(event) {
 function isGameOn() {
 	return !gameState.pause && gameAssets.snake.life;
 }
-
-/*
-// Test fullscreen :
-//check "esc" key conflict to exit fullsreen
-const headline = document.getElementById("title");
-headline.addEventListener("click", function () {
-	document.fullscreenElement != null ? document.exitFullscreen() : document.body.requestFullscreen();
-});
-*/

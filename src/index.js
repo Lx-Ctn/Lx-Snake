@@ -8,6 +8,7 @@ import { drawGameState } from "./app/game-art/drawGameState";
 import { handleControls } from "./app/handleControls";
 import { handleGameOptions } from "./app/handleGameOptions";
 import { handleResponsive } from "./app/handleResponsive";
+import { handleFullscreen } from "./app/handleFullScreen.js";
 
 // Idées à implémenter pour faire évoluer le jeu :
 // - Fullscreen
@@ -66,6 +67,7 @@ function init() {
 	appElements.canvas.width = gameSetting.canvas.width;
 	appElements.canvas.height = gameSetting.canvas.height;
 
+	handleFullscreen();
 	handleResponsive();
 	window.addEventListener("resize", handleResponsive);
 
